@@ -2,6 +2,8 @@
 
 This sub-repo has been built for self study purpose with a Udemy course for [Protocol Buffers 3](https://www.udemy.com/protocol-buffers/learn/v4/overview)
 
+Please check out the notes: [Click HERE!](TOC.md)
+
 ## About this course
 
 Google Protobuf with examples and exercises. Code in Java Go Python. Say Goodbye to JSON & XML. Pre-req to gRPC
