@@ -1,4 +1,4 @@
-# Section 1. Course Introduction
+# Section 2. Code Download & VSCode Setup
 
 ---
 
