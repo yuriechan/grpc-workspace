@@ -1,4 +1,4 @@
-# Section 1. Course Introduction 
+# Section 1. Course Introduction
 
 ---
 
