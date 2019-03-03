@@ -111,12 +111,12 @@ message MyMessage {
   * Code is generated for you automatically!
 
 * Disadvantages:
-  * Protobuf support for some languages might be lacking 
+  * Protobuf support for some languages might be lacking
     * but, the main ones are fine
   * Can't "open" the serialised data with a text editor
     * because it's compressed and serialised
 
-* Today Protocol Buffers are used as Google for almost all their internal applicaitons. 
+* Today Protocol Buffers are used as Google for almost all their internal applicaitons.
 * They have over 48000 Protobuf messages types in 12000 `.proto` files
 * If it's working for Google, there's a great chance it'll be working for you!
 
