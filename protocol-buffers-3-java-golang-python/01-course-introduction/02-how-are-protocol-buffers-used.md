@@ -33,3 +33,5 @@ With the `.proto` file, human-readable data, we can get the **sericalised data**
     * the most common format used forward
     * the best compatibility across a wide array of programming languages
 * the easiest to learn
+
+---

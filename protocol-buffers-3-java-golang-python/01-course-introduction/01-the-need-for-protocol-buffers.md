@@ -119,3 +119,5 @@ message MyMessage {
 * Today Protocol Buffers are used as Google for almost all their internal applicaitons. 
 * They have over 48000 Protobuf messages types in 12000 `.proto` files
 * If it's working for Google, there's a great chance it'll be working for you!
+
+---
