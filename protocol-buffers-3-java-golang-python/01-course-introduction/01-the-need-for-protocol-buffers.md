@@ -79,7 +79,7 @@ CREATE TABLE distributors (
   * Data has no schema enforcing
     * **You can put ANYTHING, JSON won't complain!**
   * JSON Objects can be quite big in size because of repeated keys
-  * No commnets, meetadata, documentation
+  * No comments, metadata, documentation
 
 ### An Evolution of data: **Protocol Buffers**
 
