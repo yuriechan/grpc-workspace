@@ -5,4 +5,3 @@ This document has been made for self-study purpose with materials provided by go
 ## Table of Contents
 
 [1. Overview: Developer Guide](01-developer-guide.md)
-  
