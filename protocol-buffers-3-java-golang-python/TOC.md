@@ -34,6 +34,16 @@
     * [23. Practice Using `protoc`](05-setting-up-protoc-compiler/23.md)
 
   * Section 6. Java Programming with Protocol Buffers
+    * [24. Setup & Code Download in Java](06-java-programming-with-protocol-buffers/24.md)
+    * [25. Gradle Project Setup & Code Generation](06-java-programming-with-protocol-buffers/25.md)
+    * [26. Simple Message Creation in Java](06-java-programming-with-protocol-buffers/26.md)
+    * [27. Dealing with Enums in Java](06-java-programming-with-protocol-buffers/27.md)
+    * [28. Creating a Complex Message in Java](06-java-programming-with-protocol-buffers/28.md)
+    * [29. Java Options](06-java-programming-with-protocol-buffers/29.md)
+    * [30. Convension to JSON in Java](06-java-programming-with-protocol-buffers/30.md)
+    * [31. Practice Exercise Java (self-guided)](06-java-programming-with-protocol-buffers/31.md)
+    * [32. What about Maven?](06-java-programming-with-protocol-buffers/32.md)
+
   * Section 7. Golang Programming with Protocol Buffers
   * Section 8. Python Programming with Protocol Buffers
   * Section 9. Data Evolution with Protobuf
