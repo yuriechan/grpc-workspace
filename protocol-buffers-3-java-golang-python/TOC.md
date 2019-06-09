@@ -30,7 +30,7 @@
 
 * Section 5. Setting up Protoc Compiler
   * [21. Setup Protoc Compiler](05-setting-up-protoc-compiler/21.md)
-  * [22. Use `protoc` to generate code in any lagguage](05-setting-up-protoc-compiler/22.md)
+  * [22. Use `protoc` to generate code in any language](05-setting-up-protoc-compiler/22.md)
   * [23. Practice Using `protoc`](05-setting-up-protoc-compiler/23.md)
 
 * Section 6. Java Programming with Protocol Buffers
