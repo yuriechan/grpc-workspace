@@ -448,3 +448,190 @@ func doSimple() *simplepb.SimpleMessage {
 ```
 
 ---
+
+## 38. Reading and Writing to JSON
+
+We add function that can make `main.go` read and write to JSON.
+
+add these code to the previous example:
+
+```go
+func toJSON(pb proto.Message) string {
+  marshaler := jsonpb.Marshaler{}
+  out, err := marshaler.MarshalToString(pb)
+  if (err != nil) {
+    log.Fatalln("Can't convert to JSON", err)
+    return ""
+  }
+  return out
+}
+```
+
+this will add `"github.com/golang/protobuf/jsonpb"`.
+
+then add these code to main:  
+
+```go
+smAsString := toJSON(sm)
+fmt.Println(smAsString)
+```
+
+Let's add read from JSON feature by creading another `func fromJSON(string, proto.Message)`:
+
+```go
+func fromJSON(in string, pb proto.Message) {
+  err := jsonpb.UnmarshalString(in, pb)
+  if err != nil {
+    log.Fatalln("Couldn't unmarshal the JSON into the pb struct", err)
+  }
+}
+```
+
+and add additional code to your `func main()`:
+
+your current `func main()` looks like this:
+
+```go
+func main() {
+  sm := doSimple()
+
+  readAndWriteDemo(sm)
+  smAsString := toJSON(sm)
+  fmt.Println(smAsString)
+}
+```
+
+and append these three lines:
+
+```go
+sm2 := &simplepb.SimpleMessage{}
+fromJSON(smAsString, sm2)
+fmt.Println("Successfully created proto struct:", sm2)
+```
+
+then take them into another function, `func jsonDemo()`:
+
+```go
+func jsonDemo(sm proto.Message) {
+  smAsString := toJSON(sm)
+  fmt.Println(smAsString)
+
+  sm2 := &simplepb.SimpleMessage{}
+  fromJSON(smAsString, sm2)
+  fmt.Println("Successfully created proto struct:", sm2)
+}
+```
+
+result: `main.go`
+
+```go
+package main
+
+import (
+  "fmt"
+  "io/ioutil"
+  "log"
+
+  simplepb "./src/simple"
+  "github.com/golang/protobuf/jsonpb"
+  "github.com/golang/protobuf/proto"
+)
+
+func main() {
+  sm := doSimple()
+
+  // readAndWriteDemo(sm)
+  jsonDemo(sm)
+}
+
+func toJSON(pb proto.Message) string {
+  marshaler := jsonpb.Marshaler{}
+  out, err := marshaler.MarshalToString(pb)
+  if (err != nil) {
+    log.Fatalln("Can't convert to JSON", err)
+    return ""
+  }
+  return out
+}
+
+func jsonDemo(sm proto.Message) {
+  smAsString := toJSON(sm)
+  fmt.Println(smAsString)
+
+  sm2 := &simplepb.SimpleMessage{}
+  fromJSON(smAsString, sm2)
+  fmt.Println("Successfully created proto struct:", sm2)
+}
+
+func fromJSON(in string, pb proto.Message) {
+  err := jsonpb.UnmarshalString(in, pb)
+  if err != nil {
+    log.Fatalln("Couldn't unmarshal the JSON into the pb struct", err)
+  }
+}
+
+func readAndWriteDemo(sm proto.Message) {
+  writeToFile("simple.bin", sm)
+  sm2 := &simplepb.SimpleMessage{}
+  readFromFile("simple.bin", sm2)
+  fmt.Println("Read the content:", sm2)
+}
+
+func writeToFile(fname string, pb proto.Message) error {
+  out, err := proto.Marshal(pb)
+  if err != nil {
+    log.Fatalln("Can't serialise to bytes", err)
+    return err
+  }
+
+  if err := ioutil.WriteFile(fname, out, 0644); err != nil {
+    log.Fatalln("Can't write to file", err)
+    return err
+}
+
+  fmt.Println("Data has been written!")
+  return nil
+}
+
+func readFromFile(fname string, pb proto.Message) error {
+  in, err := ioutil.ReadFile(fname)
+
+  if err != nil {
+    log.Fatalln("Something went wrong when reading the file", err)
+    return err
+  }
+
+  err2 := proto.Unmarshal(in, pb)
+  if err2 != nil {
+    log.Fatalln("Couldn't put the bytes into the protocol buffers struct", err)
+    return err2
+  }
+
+  return nil
+}
+
+func doSimple() *simplepb.SimpleMessage {
+  sm := simplepb.SimpleMessage{
+    Id:         12345,
+    IsSimple:   true,
+    Name:       "My Simple Message",
+    SimpleList: []int32{1, 4, 7, 8},
+  }
+
+  fmt.Println(sm)
+
+  sm.Name = "I renamed you."
+  fmt.Println(sm)
+
+  fmt.Println("The ID is: ", sm.GetId())
+
+  return &sm
+}
+```
+
+- The reason why we do protobuf to JSON:
+  - debugging
+  - when you want to analyse contents
+  - JSON is weaker format than protobuf messages
+
+---
