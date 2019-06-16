@@ -13,3 +13,6 @@
 
 # avoid to commit
 .DS_Store
+
+# ignore binary files
+*.bin
