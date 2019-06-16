@@ -241,3 +241,59 @@ func doSimple() {
 ```
 
 ---
+
+## 36. `go_package` option
+
+In `.proto` file, you can change behaviour of `protoc` compiler:
+
+Let's look at our previous code: `simple.proto`
+
+```proto
+syntax = "proto3";
+
+package example.simple;
+
+message SimpleMessage {
+  int32 id = 1;
+  bool is_simple = 2;
+  string name = 3;
+  repeated int32 simple_list = 4;
+}
+```
+
+Here we can add `option`:
+
+```proto
+syntax = "proto3";
+
+package example.simple;
+
+option go_package = "simplepb"
+
+message SimpleMessage {
+  int32 id = 1;
+  bool is_simple = 2;
+  string name = 3;
+  repeated int32 simple_list = 4;
+}
+```
+
+Now, we regenerate the code with `generate.sh`,  
+
+the the package name in `simple.pb.go` has been changed from
+
+```go
+package example_simple
+```
+
+to  
+
+```go
+package simplepb
+```
+
+In addition, since the `simple.pb.go` file has been updated, we also need to revise some codes in `main.go`
+
+the `option` keyword is very useful, **Uber** uses it as standard, so it's better to keep on all our protobuf files because that makes easier to read codes.
+
+---
