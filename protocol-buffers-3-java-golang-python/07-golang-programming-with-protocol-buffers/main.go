@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	example_simple "./src/simple"
+	simplepb "./src/simple"
 )
 
 func main() {
@@ -11,7 +11,7 @@ func main() {
 }
 
 func doSimple() {
-	sm := example_simple.SimpleMessage{
+	sm := simplepb.SimpleMessage{
 		Id:         12345,
 		IsSimple:   true,
 		Name:       "My Simple Message",
