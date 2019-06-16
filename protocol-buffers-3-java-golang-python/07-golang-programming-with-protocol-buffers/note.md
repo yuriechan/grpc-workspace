@@ -201,7 +201,7 @@ var fileDescriptor_9b3c868e94d57426 = []byte{
 
 Please compare the `.proto` file and `.pb.go` file!
 
-**PLEASE BE AWARE THAT WE SHOULD NOT EDIT THE GENERATED FILES**
+**PLEASE BE AWARE THAT WE SHOULD NOT EDIT THE GENERATED FILES**: The better practice is, when you want to update `.pb.go` file, then update your `.proto` file, and generate `.pb.go` file with `protoc`.
 
 ---
 
