@@ -2,6 +2,18 @@
 
 ---
 
+## 21. Setup Protoc Compiler
+
+### Setup Protoc Compiler
+
+In order to perform code generation, you will need to install `protoc` on your computer.
+
+============ MacOSX =============
+
+It is actually very easy, open a command line interface and type `brew install protobuf`
+
+---
+
 ## 22. Use `protoc` to generate code in any language
 
 Want to see all documents for `protoc` then just do this command in your bash:
@@ -79,4 +91,37 @@ we can do same things for these languages (check this out by typing `protoc` in 
 --php_out=OUT_DIR           Generate PHP source file.
 --python_out=OUT_DIR        Generate Python source file.
 --ruby_out=OUT_DIR          Generate Ruby source file.
+```
+
+---
+
+## 23. Practice Using `protoc`
+
+### Practice Using `protoc`
+
+This was a short video, and the best way to get a feel for `protoc` is to practice!
+
+So go ahead! As an exercise, use `protoc` to create javascript code (`--js_out`  option) on the files we have created in the code folder. 
+
+Happy learning :)
+
+### Actual Trial
+
+We have pre-written files with this structure
+
+`/proto/complex.proto`  
+`/proto/enum_example.proto`  
+`/proto/simple.proto`  
+
+and run this command:
+
+```bash
+protoc -I=proto --js_out=outputs/javascript proto/*.proto
+```
+
+therefore, we can get `*.javascript` file from these `*.proto` file under the directory `outputs/javascript`. If you want to get another codes for different languages, for example, python and java, you can also do this:
+
+```bash
+protoc -I=proto --java_out=outputs/java proto/*.proto
+protoc -I=proto --python_out=outputs/python proto/*.proto
 ```

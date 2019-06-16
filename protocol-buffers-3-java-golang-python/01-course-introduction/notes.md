@@ -121,3 +121,83 @@ message MyMessage {
 * If it's working for Google, there's a great chance it'll be working for you!
 
 ---
+
+## 2. How are Protocol Buffers used?
+
+### How is Protocol Buffer Used? **To share data across languages!**
+
+`.proto` files (human readable) -> *(automated generation of code)* -> Create Objects (in Java, Python, Go, etc.) -> *(encode/decode)* -> Serialised Data (can be interpreted by any language)
+
+* Serialised Data
+  * Universal:
+    * can be read by any languages
+
+With the `.proto` file, human-readable data, we can get the **sericalised data**, can be used in any programming languages.
+
+### How is Protocol Buffer Used?
+
+* Some databases may have support for Protocol Buffers data format
+* lots of RPC frameworks, use Protocol Buffers to exchange data
+  * gRPC (by Google)
+* Google uses it for all their internal API
+* Big projects
+  * `etcd`
+    * use Protocol Buffers for transporting data
+
+### Proto2 vs Proto3
+
+* Mid 2016, Google released the 3rd iteration of Protocol Buffers
+  * `proto3`
+* In this course:
+  * only cover `proto3`
+    * the most common format used forward
+    * the best compatibility across a wide array of programming languages
+* the easiest to learn
+
+---
+
+
+## 3. Course Structure
+
+### Course Structure
+
+* Part 1: Basics
+  * protobuf basics I
+    * practise exercise
+  * protobuf basics II
+    * practise exercise
+* Part 2: Programming
+  * Protocol Buffers in your favourite language
+  * protoc compilation
+  * Java, Python, Go, etc.
+* Part 3: Advanced
+  * theoretical learning
+  * data evolution
+    * how you can make your protobuf evolves everytime
+  * advanced concepts
+
+### Course Objectives
+
+1. write simple and complex `.proto` file
+2. practise exercises to confirm the learnings
+3. leverage imports and packages appropriately
+4. generate code using `protoc` in any languages
+5. code in Java / Python with Protocol Buffers
+6. understand how **data evolution** works for **Protobuf**
+7. learn about advanced concepts of Protocol Buffers
+
+### Pre-requisites
+
+* knowledge of one programming language
+* previous experience with other formats such as
+  * XML, JSON
+* willingness to learn something new
+
+### Who is this course for?
+
+* **Developers**: who wnat to
+  * understand how to write `.proto` files
+  * write code to create Protocol Buffer data
+* **Architects**: who want to
+  * understand how Protocol Buffers works
+  * be useful for their solution architecture
