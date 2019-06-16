@@ -201,3 +201,5 @@ With the `.proto` file, human-readable data, we can get the **sericalised data**
 * **Architects**: who want to
   * understand how Protocol Buffers works
   * be useful for their solution architecture
+
+---
