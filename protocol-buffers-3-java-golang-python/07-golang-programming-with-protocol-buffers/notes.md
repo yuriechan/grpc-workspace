@@ -294,6 +294,52 @@ package simplepb
 
 In addition, since the `simple.pb.go` file has been updated, we also need to revise some codes in `main.go`
 
+the current `main.go` is:
+
+```go
+
+```
+
+and after fix, the code would be:
+
+```go
+package main
+
+import (
+	"fmt"
+
+	simplepb "./src/simple"
+)
+
+func main() {
+	doSimple()
+}
+
+func doSimple() {
+	sm := simplepb.SimpleMessage{
+		Id:         12345,
+		IsSimple:   true,
+		Name:       "My Simple Message",
+		SimpleList: []int32{1, 4, 7, 8},
+	}
+
+	fmt.Println(sm)
+
+	sm.Name = "I renamed you."
+	fmt.Println(sm)
+
+	fmt.Println("The ID is: ", sm.GetId())
+	// fmt.Println("The ID is: ", sm.Id) // NOT RECOMMENDED!!!
+}
+
+```
+
 the `option` keyword is very useful, **Uber** uses it as standard, so it's better to keep on all our protobuf files because that makes easier to read codes.
+
+---
+
+## 37. Reading and Writing to Disk
+
+
 
 ---
