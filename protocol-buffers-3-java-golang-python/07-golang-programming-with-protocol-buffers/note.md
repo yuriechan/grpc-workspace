@@ -204,3 +204,40 @@ Please compare the `.proto` file and `.pb.go` file!
 **PLEASE BE AWARE THAT WE SHOULD NOT EDIT THE GENERATED FILES**
 
 ---
+
+## 35. Simple Proto Struct in Golang
+
+Now, we can add some code on the previous `main.go` file.
+
+```go
+package main
+
+import (
+  "fmt"
+
+  example_simple "./src/simple"
+)
+
+func main() {
+  doSimple()
+}
+
+func doSimple() {
+  sm := example_simple.SimpleMessage{
+    Id:         12345,
+    IsSimple:   true,
+    Name:       "My Simple Message",
+    SimpleList: []int32{1, 4, 7, 8},
+  }
+
+  fmt.Println(sm)
+
+  sm.Name = "I renamed you."
+  fmt.Println(sm)
+
+  fmt.Println("The ID is: ", sm.GetId())
+  // fmt.Println("The ID is: ", sm.Id) // NOT RECOMMENDED!!!
+}
+```
+
+---
