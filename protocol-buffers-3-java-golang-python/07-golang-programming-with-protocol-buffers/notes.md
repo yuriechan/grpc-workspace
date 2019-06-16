@@ -297,7 +297,34 @@ In addition, since the `simple.pb.go` file has been updated, we also need to rev
 the current `main.go` is:
 
 ```go
+package main
 
+import (
+  "fmt"
+
+  example_simple "./src/simple"
+)
+
+func main() {
+  doSimple()
+}
+
+func doSimple() {
+  sm := example_simple.SimpleMessage{
+    Id:         12345,
+    IsSimple:   true,
+    Name:       "My Simple Message",
+    SimpleList: []int32{1, 4, 7, 8},
+  }
+
+  fmt.Println(sm)
+
+  sm.Name = "I renamed you."
+  fmt.Println(sm)
+
+  fmt.Println("The ID is: ", sm.GetId())
+  // fmt.Println("The ID is: ", sm.Id) // NOT RECOMMENDED!!!
+}
 ```
 
 and after fix, the code would be:
@@ -306,32 +333,31 @@ and after fix, the code would be:
 package main
 
 import (
-	"fmt"
+  "fmt"
 
-	simplepb "./src/simple"
+  simplepb "./src/simple"
 )
 
 func main() {
-	doSimple()
+  doSimple()
 }
 
 func doSimple() {
-	sm := simplepb.SimpleMessage{
-		Id:         12345,
-		IsSimple:   true,
-		Name:       "My Simple Message",
-		SimpleList: []int32{1, 4, 7, 8},
-	}
+  sm := simplepb.SimpleMessage{
+    Id:         12345,
+    IsSimple:   true,
+    Name:       "My Simple Message",
+    SimpleList: []int32{1, 4, 7, 8},
+  }
 
-	fmt.Println(sm)
+  fmt.Println(sm)
 
-	sm.Name = "I renamed you."
-	fmt.Println(sm)
+  sm.Name = "I renamed you."
+  fmt.Println(sm)
 
-	fmt.Println("The ID is: ", sm.GetId())
-	// fmt.Println("The ID is: ", sm.Id) // NOT RECOMMENDED!!!
+  fmt.Println("The ID is: ", sm.GetId())
+  // fmt.Println("The ID is: ", sm.Id) // NOT RECOMMENDED!!!
 }
-
 ```
 
 the `option` keyword is very useful, **Uber** uses it as standard, so it's better to keep on all our protobuf files because that makes easier to read codes.
