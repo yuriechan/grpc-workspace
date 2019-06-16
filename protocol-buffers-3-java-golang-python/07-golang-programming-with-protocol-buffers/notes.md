@@ -366,7 +366,9 @@ the `option` keyword is very useful, **Uber** uses it as standard, so it's bette
 
 ## 37. Reading and Writing to Disk
 
-Let's think about how to read and write to our disk.
+Let's think about how to read and write to our disk.  
+
+the code below is updaetd for writing and reading data to our disk:  
 
 ```go
 package main
