@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package example.enumerations;
 
+option go_package = "enumpb";
+
 message EnumMessage {
   int32 id = 1;
   DayOfTheWeek day_of_the_week = 2;
