@@ -214,7 +214,7 @@ message Foo {
 
 ---
 
-## 56. Evolbing Enum Fields
+## 56. Evolving Enum Fields
 
 * `DayOfWeek` example
 
