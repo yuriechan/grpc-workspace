@@ -519,6 +519,168 @@ service HelloService {
 
 ## 63. Introduction to gRPC (from gRPC Course)
 
+* Today's trend is to build microservices (MS)
+  * MS are built in different lagnuages and encompass a function of your business:
+    * in an App
+      * Buy MS
+      * Delivery MS
+      * User MS
+      * Promotion MS
+      * ...
+  * These MS must exchange info. and need to agree on:
+    * the API to exchange data
+    * the data format
+    * the error patterns
+    * load balancing
+    * many other...
+  * one of the popular choice for building API is REST (HTTP-JSON)
+    * but we will use **gRPC**
+
+* Building an API is hard
+  * need to think about data model:
+    * JSON
+    * XML
+    * something binary?
+    * ...
+  * need to think about the endpoint
+    * `GET /api/v1/user/123/post/456`
+    * `POST /api/v1/user/123/post`
+  * need to think about how to invoke it and handle errors:
+    * API
+    * errors
+  * need to think about efficiency of the API
+    * how much data do I get out of one call?
+    * too much data
+    * too little data, but many API calls?
+  * how about:
+    * latency
+    * scalability to 1000s of clients?
+    * load balancing
+    * inter operability with many different languages?
+    * authentication
+    * monitoring
+    * logging
+    * ...
+
+* What's an API?
+  * at its core, an API is a contract, saying:
+    * send me this `REQUEST` (client)
+    * I'll send you this `RESPONSE` (server)
+  * **it's all about data**
+  * the rest, we'll leave to the gRPC framework
+
+* What's gRPC?
+  * free and open-source framework
+  * developed by google
+  * part of the CNCF (Cloud Native Computation Foundation)
+    * like: Docker & Kubernetes
+  * at a hight level, it allows you to define:
+    * `REQUEST`
+    * `RESPONSE`
+  * for RPC (Remote Procedure Call) and handle all the rest for you.
+  * on top of it, it's:
+    * modern
+    * fast
+    * efficient
+    * build on top of `HTTP/2`
+    * low latency
+    * supports streaming
+    * language independent
+    * super easy to plug in:
+      * authentication
+      * load balancing
+      * logging
+      * monitoring
+
+* What's RPC
+  * Remote Procedure Call
+  * in your CLIENT code, it looks like you're just calling a function directly on the SERVER
+    * client code (any language)
+
+    ```rpc
+    (code)
+    ...
+    server.CreateUser(user)
+    ...
+    (code)
+    ```
+
+    * server code (any language)
+
+    ```rpc
+    // function creating users
+    def CreateUser(User user) {
+      ...
+    }
+    ```
+
+    * RPC call from the client to server over the network
+  * it's NOT a new concept (CORBA had this before)
+  * with **gRPC**, it's implemented very cleanly and solves a lot of problems
+    * e.g. Here are the three nodes
+      * i. C++ server (gRPC Server)
+      * ii. Ruby Client (gRPC Stub)
+      * iii. Android-Java Client (gRPC Stub)
+    * between the client and server, they can communicate with:
+      * proto request (client to server)
+      * proto response (server to client)
+
+* How to get started?
+  * at the core of gRPC
+    * you need to define the messages and services using **protocol buffers** (`*.proto`)
+    * the rest of the gRPC code:
+      * automatically generated
+      * we just need to provide an implementation for that
+    * one `.proto` file works for over 12 programming languages (server and client)
+      * allows you to use a framework that scales to millions of RPC per seconds.
+
+* Sneak peak at what we'll do - the `GreetService`
+
+Here is an `example.proto`
+
+```proto
+syntax = "proto3";
+
+message Greeting {
+  string first_name = 1;
+}
+
+message GreetRequest {
+  Greeting greeting = 1;
+}
+
+message GreetResponse {
+  string result = 1;
+}
+
+service GreetService {
+  rpc Greet(GreetRequest) returns (GreetResponse) {};
+}
+```
+
+* Why Protocol Buffers?
+  * protobufs are language agnostic
+  * code can be generated for many languages
+  * data is binary
+    * efficiently serialised (small payload)
+  * very convenient for transporting a lot of data
+  * protobufs allow for easy API evolution using rules
+
+before you study gRPC, you should know basic of Protocol Buffers!
+
+* Why should I learn it?
+  * many companies have embraced it fully in their production
+    * Mercari
+    * Google (internally and for Google Cloud services like Pub/Sub)
+    * Netflix
+    * Square (first contributor, replacement of all their APIs)
+    * CoreOS (etcd 3 is built on gRPC for server-server communication)
+    * CoackroachDB
+  * gRPC
+    * future micro-service API
+    * mobile-server API
+    * (maybe) web APIs
+
 ---
 
 ## 64. Protocol Buffers Internals
