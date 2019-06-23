@@ -124,6 +124,22 @@
 
 ## 59. Protocol Buffers Options
 
+* `option`s allow to alter the behaviour of the `protoc` compiler
+  * when generating code for specific languages
+* there are few bundled options
+  * check the docs for details
+  * examples:
+  
+  ```proto
+  option csharp_namespace = "Google.Protobuf.WellKnownTypes";
+  option cc_enable_arenas = true;
+  option go_package = "github.com/golang/protobuf/ptypes/duration";
+  option java_package = "com.google.protobuf";
+  option java_outer_classname = "DurationProto";
+  option java_multiple_files = true;
+  option objc_class_prefix = "GPB";
+  ```
+
 ---
 
 ## 60. Naming Conventions
