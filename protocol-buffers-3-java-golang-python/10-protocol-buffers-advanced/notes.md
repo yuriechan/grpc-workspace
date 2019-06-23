@@ -465,6 +465,56 @@ service HelloService {
 
 ## 62. Services
 
+* Introduction to Protocol Buffer Services
+  * protocol buffers can define `service`s on top of `message`s
+  * a `service` is...
+    * a **set of endpoints** your application can be accessible from
+
+    ```proto
+    service SearchService {
+      rpc Search (SearchRequest) returns (SearchResponse);
+    }
+    ```
+
+  * services need to be interpreted by a framework to generate associated code
+  * the main framework is **gRPC**
+    * or others...
+
+* Introduction to Protocol Buffer Services
+  * gRPC Server <- Protocol Buffer Request <- gRPC Client
+  * gRPC Server -> Protocol Buffer Response -> gRPC Client
+  * e.g.
+    * in a Java Server we have an gRPC server - exposes services (API endpoints)
+    * an Go Client which has gRPC Client (Automatically Generated), can send proto request to the gRPC Server inside of the Java server and the go Client (its gRPC client) can get proto response.
+    * In the meanwhile, another client, Python client that also has gRPC Client (Augomatically Generated) can do the same thing to the gRPC Server in the Java Server
+  * the clients can be automatically generated
+
+* The advantage of Services & RPC (Remote Procedure Calling)
+  * you can call your Server API from any client seamlessly
+* gRPC for example is used by:
+  * Google
+  * Netflix
+  * CoreOS (etcd)
+  * Google Cloud API
+  * and gaining popularity fast!
+
+  ```proto
+  syntax = "proto3";
+
+  message SearchRequest {
+    int32 person_id = 1;
+  }
+
+  message SearchResponse {
+    int32 person_id = 1;
+    string person_name = 2;
+  }
+
+  service SearchService {
+    rpc Search(SearchRequest) returns (SearchResponse);
+  }
+  ```
+
 ---
 
 ## 63. Introduction to gRPC (from gRPC Course)
