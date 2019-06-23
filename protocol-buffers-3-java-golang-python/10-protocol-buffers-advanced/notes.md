@@ -16,7 +16,7 @@
     * `fixed64`
     * `sfixed32`
     * `sfixed64`
-  * each tpye is constructed to handle:
+  * each type is constructed to handle:
     * i. range of allowed values: 64 bits has wider value range than 32 bits
     * ii. whether negative values are allowed: `uint32` vs `sint32`
     * iii. size efficiency on serialisation
@@ -143,6 +143,26 @@
 ---
 
 ## 60. Naming Conventions
+
+* Naming Convention from the doc
+  * Refer to: [HERE](https://developers.google.com/protocol-buffers/docs/style)
+  * use **PascalCase** for `message` names
+  * use **snake_case** for fields
+
+  ```proto
+  message MyMessage {
+    string my_long_field = 1;
+  }
+  ```
+
+  * Use **PascalCase** for `enum`s and **CAPITAL_WITH_UNDERSCORE** for values' names
+
+  ```proto
+  enum Foo {
+    FIRST_VALUE = 0;
+    SECOND_VALUE = 1;
+  }
+  ```
 
 ---
 
