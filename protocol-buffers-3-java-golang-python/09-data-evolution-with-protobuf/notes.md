@@ -174,6 +174,22 @@ message MyMessage {
 
 ## 54. Reserved Keyword
 
+* can reserve TAGS and FIELD NAMES
+* can't mi TAGS and FIELD NAMES in the same `reserved` statement
+* e.g.
+
+```proto
+message Foo {
+  reserved 2, 15, 9 to 11;
+  reserved "foo", "bar";
+}
+```
+
+* we reserve TAGS to prevent new fields from reusing tags
+  * because that would break old code at runtime
+* we reserve FIELD NAMES to prevent code bugs
+* **Do NOT EVER remove any reserved tags!!!**
+
 ---
 
 ## 55. Beware of Defualts
