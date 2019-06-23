@@ -51,6 +51,75 @@
 
 ## 58. Advanced Data Types (`oneof`, `map`, `Timestamp`, and `Duration)
 
+* Advacned Types - `oneof`
+  * you can use `oneof` to tell protocol buffers that only one field can have a value:
+
+  ```proto
+  message MyMessage {
+    int32 id = 1;
+    one of example_oneof {
+      string my_string = 2;
+      bool my_bool = 3;
+    }
+  }
+  ```
+
+  * `oneof` fields **CANNOT** repeated
+  * evolving schemas using `oneof` is complicated
+    * see documentation if you really need
+  * on read, all fields will be `null` except the last one that was set at write
+
+* Advanced Types - `map`s
+  * maps can be used to map scalars (except `float` / `double`) to values of any type
+
+  ```proto
+  message MyMessage {
+    int32 id = 1;
+    map<string, Result> results = 2;
+  }
+  ```
+
+  * map fields cannot be repeated
+  * there's no ordering for `map`
+    * it's key => value store
+
+* Advanced Types - `Timestamps` (Well Known Types)
+  * protocol buffers contain a set of Well Known Types
+    * e.g. advanced types known to all programming languages
+  * the list is here: [link](https://developers.google.com/protocol-buffers/docs/reference/csharp/class/google/protobuf/well-known-types/timestamp)
+  * one of the types is `Timestamp`
+    * fields are:
+      * `seconds`
+      * `nanoseconds` (UTC)
+  * do not forget to use `import` statement
+
+  ```proto
+  syntax = "proto3";
+
+  import "google/protobuf/timestamp.proto";
+
+  message MyMessage {
+    google.protobuf.Timestamp my_field = 1;
+  }
+  ```
+
+* Advanced Types - `Duration`
+  * `Duration` is another Well Known Type
+  * It represents the time span between two timestamps
+  * It contains, just like `Timestamp`, `seconds` and `nanoseconds`
+
+  ```proto
+  syntax = "proto3";
+
+  import "google/protobuf/timestamp.proto";
+  import "google/protobuf/duration.proto";
+
+  message MyMessage {
+    google.protobuf.Timestamp msg_date = 1;
+    google.protobuf.Duration validaty = 2;
+  }
+  ```
+
 ---
 
 ## 59. Protocol Buffers Options
