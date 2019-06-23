@@ -1387,3 +1387,27 @@ message AddressBook {
 - Solution will be here with some readings: [link](https://developers.google.com/protocol-buffers/docs/gotutorial)
 
 ---
+
+## 42. `GoGo` Protobuf as an Alternative
+
+### GoGo
+
+- In the open source world, it is not unusual to see active community members fork a popular project and add features they find the community needs.
+- One notable project is "gogo", created by Walter Schulze
+  - aims to provide an alternative at how Protocol Buffers and gRPC are implemented in Go
+  - This different implementation from the one provided by Google has many benefits, mainly around performance and usability, as well as providing more code generation options, which makes this project one of the most important in the protobuf & gRPC ecosystem today
+  - You can find the project alongside its 1800+ stars on GitHub here: https://github.com/gogo/protobufAs per their project:
+
+### gogoproto
+
+- `gogoprotobuf` is a fork of golang/protobuf with extra code generation features.
+- This code generation is used to achieve:
+  - fast marshalling and unmarshalling
+  - more canonical Go structures
+  - goprotobuf compatibility
+  - less typing by optionally generating extra helper code
+  - peace of mind by optionally generating test and benchmark code
+  - other serialization formats
+  - There's a really nice article describing how to get started: https://jbrandhorst.com/post/gogoproto/
+
+---
