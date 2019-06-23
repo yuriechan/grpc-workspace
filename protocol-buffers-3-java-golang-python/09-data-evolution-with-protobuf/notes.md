@@ -84,6 +84,29 @@ message MyMessage {
 
 ## 52. Renaming Fields
 
+* old schema:
+
+```proto
+message MyMessage {
+  int32 id = 1;
+  string first_name = 2;
+}
+```
+
+* new schema:
+
+```proto
+message MyMessage {
+  int32 id = 1;
+  string person_first_name = 2;
+}
+```
+
+* in ths case, nothing change except the field name:
+  * field name can be changed easily
+  * **tag numbers** are ONLY important for protobuf/machines
+    * they do not care that much on human-readable field names
+
 ---
 
 ## 53. Removing Fields
