@@ -172,8 +172,8 @@
   * [github](https://github.com/uber/prototool/blob/dev/etc/style/uber1/uber1.proto)
   * have a look below:
 
-  ```proto
-  // Protobuf Uber V1 Style Guide
+```proto
+// Protobuf Uber V1 Style Guide
 //
 // This is the default style enforced with lint.
 //
@@ -459,7 +459,7 @@ service HelloService {
   // StreamQuasars streams quasars.
   rpc StreamQuasars(stream StreamQuasarsRequest) returns (StreamQuasarsResponse);
 }
-  ```
+```
 
 ---
 
