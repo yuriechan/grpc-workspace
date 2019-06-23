@@ -192,7 +192,7 @@ message Foo {
 
 ---
 
-## 55. Beware of Defualts
+## 55. Beware of Defaults
 
 * **defaults are great, but they are tricky to deal with**:
   * defaults allow us to easily EVOLVE Protobuf fiels w/o breaking any existing or new code
