@@ -216,4 +216,31 @@ message Foo {
 
 ## 56. Evolbing Enum Fields
 
+* `DayOfWeek` example
+
+```proto
+// Represents a day of week.
+enum DayOfWeek {
+  DAY_OF_WEEK_UNSPECIFIED = 0;
+  MONDAY = 1;
+  TUESDAY = 2;
+  WEDNESDAY = 3;
+  THURSDAY = 4;
+  FRIDAY = 5;
+  SATURDAY = 6;
+  SUNDAY = 7;
+}
+```
+
+* Enumerations (`enum`) can evolve:
+  * you can:
+    * add
+    * remove
+    * reserve
+* if the code does NOT know what the received enum value corresponds to
+  * the default value will be used
+* Therefore, **recommended** to make the very first value like that:
+  * `UNKNOWN = 0`
+  * or our example: `DAY_OF_WEEK_UNSPECIFIED = 0`
+
 ---
