@@ -111,6 +111,65 @@ message MyMessage {
 
 ## 53. Removing Fields
 
+* remove a field in our schema:
+
+old data:
+
+```proto
+message MyMessage {
+  int32 id = 1;
+  string first_name = 2;
+}
+```
+
+new data:
+
+```proto
+message MyMessage {
+  int32 = id = 1;
+}
+```
+
+* if old code does NOT find the deleted field message
+  * the **default value** will be used
+* oppositely, if we read old data with the new code
+  * the deleted field will just be dropped
+* Again, **default values should always be interpreted with care**
+
+* Removing Fields - Reserving Tags
+  * when removing a field
+    * should **ALWAYS** reserve the **tag** and the **name**
+
+before:
+
+```proto
+message MyMessage {
+  int32 id = 1;
+  string first_name = 2;
+}
+```
+
+after:
+
+```proto
+message MyMessage {
+  reserved 2;
+  reserved "first_name";
+  int32 id = 1;
+}
+```
+
+* to prevent
+  * the tag / field name to be reused
+* necessary to prevent conflicts in the codebase
+
+* Removing Fields - Make some fields obsolete
+  * alternative way:
+    * rename the field as: `OBSOLETE_field_name`
+  * downside would be:
+    * you may have to populate that field while your client get upgraded to use the newer field that replaces it (which has a new tag)
+  * **Personally like the `reserved` keyword**
+
 ---
 
 ## 54. Reserved Keyword
