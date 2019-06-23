@@ -194,6 +194,24 @@ message Foo {
 
 ## 55. Beware of Defualts
 
+* **defaults are great, but they are tricky to deal with**:
+  * defaults allow us to easily EVOLVE Protobuf fiels w/o breaking any existing or new code
+  * they also ensure we know that a field will always have a non-null value
+  * **BUT**, `default`s are dangerous since:
+    * **You CANNOT differentiate from a missing field or if a value equal to the default was set!**
+      * example: some user enter EMPTY STRING as their user names
+        * we can't say they actually enter this field or
+        * it's just missing
+      * example: an account balance is ZERO
+        * we can't say whether it's actually ZERO or not
+          * is that a missing value OR intended to set as default value?
+
+* Beware of Default!
+  * what can we do about it?
+    * make sure the default value does NOT have meaning for your business
+    * deal with default values in your code if needed
+      * with `if` statement
+
 ---
 
 ## 56. Evolbing Enum Fields
