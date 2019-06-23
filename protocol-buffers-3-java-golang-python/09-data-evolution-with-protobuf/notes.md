@@ -52,6 +52,34 @@ Write data with Old `.Proto` -> Read data with New `.proto`
 
 ## 51. Adding Fields
 
+* Let's add a field to our schema with new tab number:
+
+Current code is this:
+
+```proto
+message MyMessage {
+  int32 id = 1;
+}
+```
+
+and we evolve it as:
+
+```proto
+message MyMessage {
+  int32 id = 1;
+  string first_name = 2;
+}
+```
+
+* if that field is sent to old code:
+  * the old code will NOT know
+    * what that tag number corresponds to
+    * and the new field will be ignored / dropped
+* oppositely, if we read old data with the new code
+  * the new field will not be found
+    * and the default value will be assumed (empty string)
+* Therefore, **default values should always be interpreted with care**
+
 ---
 
 ## 52. Renaming Fields
