@@ -1,4 +1,4 @@
-# Session 01 gRPC Course Overview
+# Session 01 - gRPC Course Overview
 
 ---
 
