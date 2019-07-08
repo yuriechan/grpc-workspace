@@ -1,4 +1,4 @@
-# Session 01 - gRPC Course Overview
+# Session 01: gRPC Course Overview
 
 ---
 
@@ -200,9 +200,5 @@ service GreetService {
 ## 3. Important Message
 
 * programming parts will be after the theory
-
-## 4. Code Download
-
-* github repo: [link](https://github.com/simplesteph/grpc-go-course)
 
 ---
