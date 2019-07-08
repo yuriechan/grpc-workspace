@@ -4,6 +4,9 @@
 
 ## 5. Why this section?
 
+* learning framework is fun, but being able to understand theory is integral
+* if you don't care about theory, you can skip this section
+
 ---
 
 ## 6. Protocol Buffers & Language Interoperability
