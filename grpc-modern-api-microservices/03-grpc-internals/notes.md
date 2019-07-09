@@ -138,6 +138,72 @@ message Person {
 
 ## 7. HTTP/2
 
+### What's HTTP/2
+
+* gRPC leverages HTTP/2 as a backbone for communications
+* demo: [link](https://imagekit.io/demo/http2-vs-http1)
+* HTTP/2 is the newer standard for the Internet communication that address common pitfall of HTTP/1.1 on modern web pages
+* before we go into HTTP/2
+  * let's look at some HTTP/1.1 requests
+
+### How HTTP/1.1 works
+
+* released in 1997, worked great for many years
+* HTTP/1.1 opens a new TCP connection to a server at each request
+* it does NOT compress headers (which are plaintext)
+* it only works with Request/Response mechanism (no server push)
+* HTTP was orignally composed of two commands:
+  * `GET`: to ask for content
+  * `POST`: to send content
+* Nowadays, a web page loads 80 assets on average
+* Headers are sent at every request and are PLAINTEXT (heavy size)
+* each request opens a TCP connection
+* these inefficiencies add latency and increase network packet size
+
+```example
+Client  ->  request 1   -> HTTP 1.1 Server
+Client  <-  response 1  <- HTTP 1.1 Server
+Client  ->  request 2   -> HTTP 1.1 Server
+Client  <-  response 2  <- HTTP 1.1 Server
+```
+
+### How HTTP/2 works
+
+* HTTP 2 was released in 2015
+* it has been battled tested for many years
+  * and was tested by Google under the name SPDY
+* HTTP 2 supports
+  * multiplexing
+    * the client &  server can push messages in parallel over the same TCP
+      * this greatly reduce latency
+  * server push
+    * server can push streams (multiple messages) for one request from the client
+  * header compression
+    * headeres (text based) can now be compressed
+    * these have much less impact on the packet size
+    * (remember the average http request may have over 20 headers, due to cookies, content cache, and application headers)
+* HTTP/2 is binary
+  * while HTTP/1 text makes it easy for debugging, it's not efficient over the network
+  * (Protocol Buffers is a binary protocol and make it a great match for HTTP2)
+  * HTTP/2 is secure (SSL is not required but recommended by default)
+
+```example
+Client  ->  Single TCP connection -> HTTP 2 Server
+Client  ->  Request 1             -> HTTP 2 Server
+Client  <-  Response 1            <- HTTP 2 Server
+Client  <-  Response 2            <- HTTP 2 Server
+Client  <-  Response 3            <- HTTP 2 Server
+Client  <-  Response ...          <- HTTP 2 Server
+```
+
+### HTTP/2: Bottom Line
+
+* less chatter
+* more efficient protocol (less bandwidth)
+* reduce latency
+* increased security
+* **and you get all these improvements out of the box by using the gRPC framework!**
+
 ---
 
 ## 8. 4 Types of gRPC APIs
