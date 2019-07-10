@@ -208,6 +208,32 @@ Client  <-  Response ...          <- HTTP 2 Server
 
 ## 8. 4 Types of gRPC APIs
 
+* the 4 types
+  * Unary
+  * Server Streaming
+  * Client Streaming
+  * Bi-Directional Streaming
+* Unary is what a traditional API looks like (HTTP REST)
+* HTTP/2 as we've seen, enables APIs to now have streaming capabilities
+* the server and the client can push multiple messages as part of one request
+* in gRPC, it's very easy to define these APIs as we'll see
+
+```proto
+service GreetService {
+  // Unary
+  rpc Greet(GreetRequest) returns (GreetResponse) {};
+
+  // Streaming Server
+  rpc GreetManyTimes(GreetManyTimesRequest) returns (stream GreetManyTimesResponse) {};
+
+  // Streaming Client
+  rpc LongGreet(stream LongGreetRequest) returns (LongGreetResponse) {};
+
+  // Bi Directional Streaming
+  rpc GreetEveryone(stream GreetEveryoneRequest) returns (stream GreetEveryoneResponse) {};
+}
+```
+
 ---
 
 ## 9. Scalability in gRPC
