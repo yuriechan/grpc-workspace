@@ -238,6 +238,15 @@ service GreetService {
 
 ## 9. Scalability in gRPC
 
+* gRPC servers are asynchronous by default
+  * this means they do not block threads on request
+  * therefore, each gRPC server can serve millions of requests in parallel
+* gRPC clients can be asynchronous or synchronous (blocking)
+  * the client decides which model works best for the performance needs
+  * gRPC clients can perform client side load balancing
+* as a proof of scalability:
+  * Google has 10 BILLION gRPC requests being made per second internally
+
 ---
 
 ## 10. Security in gRPC (SSL)
