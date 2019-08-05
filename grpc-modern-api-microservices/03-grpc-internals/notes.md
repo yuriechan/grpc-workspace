@@ -260,6 +260,52 @@ service GreetService {
 
 ## 11. gRPC vs REST
 
+### REST API example
+
+```bash
+POST /member/109087/cart HTTP/1.1
+Host: api.example.com
+Authorization: Basic username:password
+Content-type: application/json
+Accept: application/hal+json
+
+[
+  "inventory_id": 12345,
+  "quantity": 1
+]
+
+HTTP/1.1 201 Created
+Date: Mon, 20 Jun 2011 21:15:00 GMT
+Content-Type: application/hal+json
+Location: /member/109087/cart/14418796
+```
+
+### gRPC vs REST
+
+| gRPC | REST |
+| --- | --- |
+| Protocol Buffers - smaller, faster | JSON - text based, slower, bigger |
+| HTTP/2 (lower latency) - from 2015 | HTTP1.1 (higher latency) - from 1997 |
+| Bidirectional & Async | Client => Server request only |
+| Stream Support | Request / Response support only |
+| API Oriented - "What" (no constraints - free design) | CRUD Oriented (Create - Retrieve - Update - Delete / POST GET PUT DELETE) |
+| API oriented | Resource oriented |
+| Code Generation through Protocol Buffers in any language - 1st class citizen | Code generation through OpenAPI / Swagger (add-on) - 2nd class citizen |
+| RPC Based - gRPC does the plumbing for us (we can call functions directly on the server) | HTTP verbs based - we have to write the plumbing or use a 3rd party library |
+
+* REST, if you perfectly implement, many people do NOT implement rest as pure, they do REST-ish or REST-ful API
+  * basically, REST is CRUD-oriented
+    * Create user
+    * Retrieve user
+    * Update user
+    * Delete user
+* GRPC - RPC based
+  * client can call function in the server
+
+* benchmark:
+  * https://husobee.github.io/golang/rest/grpc/2016/05/28/golang-rest-v-grpc.html
+    * gRPC is 25 times more performant than REST API (as defined as time to have the response for an API)
+
 ---
 
 ## 12. Section Summary - why use gRPC
