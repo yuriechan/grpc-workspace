@@ -310,6 +310,12 @@ Location: /member/109087/cart/14418796
 
 ## 12. Section Summary - why use gRPC
 
+* easy code definition in over 11 languages
+* uses a modern, low latency HTTP/2 transport mechanism
+* SSL security is built in
+* support for streaming APIs for maximum performance
+* gRPC is API oriented, insteard of Resource Oriented like REST
+
 ---
 
 ## Quiz 1: Quiz on gRPC
