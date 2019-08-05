@@ -317,7 +317,3 @@ Location: /member/109087/cart/14418796
 * gRPC is API oriented, insteard of Resource Oriented like REST
 
 ---
-
-## Quiz 1: Quiz on gRPC
-
----
