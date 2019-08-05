@@ -251,6 +251,11 @@ service GreetService {
 
 ## 10. Security in gRPC (SSL)
 
+* by default, gRPC strongly advocates for you to use SSL (encryption over the wire) in your API
+* this means that gRPC has security as a first class citizen
+* each language will provide an API to load gRPC with the required certificates and provide encryption capability out of the box
+* additionally, using **internceptors**, we can also provide authentication (will covered by advanced section later)
+
 ---
 
 ## 11. gRPC vs REST
