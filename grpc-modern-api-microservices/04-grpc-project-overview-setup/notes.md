@@ -33,6 +33,21 @@ go version go1.12.6 darwin/amd64
 
 ## 14. Go Dependencies Setup
 
+* visit `gRPC-GO` github: [link](https://github.com/grpc/grpc-go)
+* and follow the installation instructions:
+  * it takes some time
+
+```bash
+go get -u google.golang.org/grpc
+```
+
+* visit `golang/protobuf` github: [link](https://github.com/golang/protobuf)
+* run this command:
+
+```bash
+go get -u github.com/golang/protobuf/protoc-gen-go
+```
+
 ---
 
 ## 15. Code Generation Test
