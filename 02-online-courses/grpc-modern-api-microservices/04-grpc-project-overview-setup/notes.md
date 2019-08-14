@@ -120,6 +120,37 @@ var fileDescriptor_fe6f881da19a2871 = []byte{
 
 ## 16. Server Setup Boilerplate Code
 
+### 16.1. gRPC Server Setup
+
+* setup a gRPC Server with no service on it
+* we'll see how to properly start & stop the Server on a defined **port**
+* the point for this trial is just to be done with "boilerplate code"
+
+Let's create another directory under `greet` as `greet_server`
+
+* `pwd/greet/greet_server`
+
+and add a file `server.go`
+
+```go
+package main
+
+import "fmt"
+
+func main() {
+  fmt.Println("Hello world!")
+}
+```
+
+make sure this code is running on your machine:
+
+```bash
+go run greet/greet_server/server.go
+```
+
+Now, you are ready to write a server: let's go back to the file
+
+
 ---
 
 ## 17. Client Setup Boilerplate Code
