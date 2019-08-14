@@ -314,6 +314,6 @@ Location: /member/109087/cart/14418796
 * uses a modern, low latency HTTP/2 transport mechanism
 * SSL security is built in
 * support for streaming APIs for maximum performance
-* gRPC is API oriented, insteard of Resource Oriented like REST
+* gRPC is API oriented, instead of Resource Oriented like REST
 
 ---
