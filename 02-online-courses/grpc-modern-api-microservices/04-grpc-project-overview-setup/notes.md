@@ -234,4 +234,53 @@ and see a pop up message for connection confirmation and your terminal will show
 
 ## 17. Client Setup Boilerplate Code
 
+### 17.1. gRPC Client Setup
+
+* setup a gRPC Client that connects to our Server
+* we'll see how to properly start & stop the Client
+* the point for this trial is just to be done with "boilerplate code"
+
+Let's create another directory under `greet` as `greet_client` and under that directory, create `client.go`
+
+```go
+package main
+
+import (
+  "fmt"
+  "log"
+  "../greetpb"
+  "google.golang.org/grpc"
+)
+
+func main() {
+  fmt.Println("Hello, I am a client.")
+
+  cc, err := grpc.Dial("localhost:50051", grpc.WithInsecure())	// WithInsecure() for just now testing
+  if err != nil {
+    log.Fatalf("Could not connect: %v", err)
+  }
+
+  defer cc.Close()
+
+  c := greetpb.NewGreetServiceClient(cc)
+  fmt.Printf("Created client: %f", c)
+}
+```
+
+* now you can run the client after running the `server.go` in the other terminal:
+
+* terminal 1:
+
+```bash
+go run greet/greet_server/server.go
+```
+
+* terminal 2:
+
+```bash
+go run greet/greet_client/client.go
+```
+
+* be aware that since we don't pass any message, the client is actually runable without server running but this is basic flow how server and client work together.
+
 ---
