@@ -16,3 +16,7 @@
 
 # ignore binary files
 *.bin
+
+# ignore IDEs
+.code/
+.idea/
