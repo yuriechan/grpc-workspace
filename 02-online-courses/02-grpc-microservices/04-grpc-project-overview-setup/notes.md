@@ -1,4 +1,4 @@
-# Session 04: [Hands-On] gRPC Project Overview & Setup 
+# Session 04: [Hands-On] gRPC Project Overview & Setup
 
 ---
 
