@@ -37,11 +37,42 @@ service GreetService {
 }
 ```
 
-
-
 ---
 
 ## 19. Greet API Definition
+
+### 19.1 Hands On - Greet API Definition
+
+* **Hands On**: define a Unary "Greet" API
+* our message is: `Greeting`
+  * contains: `first_name`, `last_name` string field
+  * will take: a `GreetRequest` that contains a `Greeting`
+  * will return: a `GreetResponse` that contains a `result` string
+
+```proto
+syntax = "proto3";
+
+package greet;
+option go_package="greetpb";
+
+message Greeting {
+  string first_name = 1;
+  string last_name = 2;
+}
+
+message GreetRequest {
+  Greeting greeting = 1;
+}
+
+message GreetResponse {
+  string result = 1;
+}
+
+service GreetService {
+  // Unary
+  rpc Greet(GreetRequest) returns (GreetResponse) {};
+}
+```
 
 ---
 
