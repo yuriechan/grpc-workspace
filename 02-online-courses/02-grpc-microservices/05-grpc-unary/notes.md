@@ -258,5 +258,154 @@ Greet function was invoked with greeting:<first_name:"Mark" last_name:"Hahn" >
 
 ## 23. [Solution] Sum API
 
----
+* create this directory and files:
+  * `calculator`
+    * `calculator_client`
+      * `client.go`
+    * `calculator_server`
+      * `server.go`
+    * `calculatorpb`
+      * `calculator.proto`
 
+let's define the `.proto` file first:
+
+```proto
+syntax = "proto3";
+
+package calculator;
+option go_package = "calculatorpb";
+
+message SumRequest {
+  int32 first_number = 1;
+  int32 second_number = 2;
+}
+
+message SumResponse {
+  int32 sum_result = 1;
+}
+
+service CalculatorService {
+  rpc Sum(SumRequest) returns (SumResponse) {};
+}
+```
+
+and generate code with this command:
+
+```bash
+protoc calculator/calculatorpb/calculator.proto --go_out=plugins=grpc:.
+```
+
+then, we get `calculator.pb.go` under `calculatorpb` directory which is also a directory that has `calculator.proto`.
+
+Now, we can write the Server first:
+
+```go
+package main
+
+import (
+  "context"
+  "fmt"
+  "log"
+  "net"
+
+  "../calculatorpb"
+  "google.golang.org/grpc"
+)
+
+type server struct{}
+
+func (*server) Sum(ctx context.Context, req *calculatorpb.SumRequest) (*calculatorpb.SumResponse, error) {
+  fmt.Printf("Received Sum RPC: %v", req)
+  firstNumber := req.FirstNumber
+  secondNumber := req.SecondNumber
+  sum := firstNumber + secondNumber
+  res := &calculatorpb.SumResponse{
+    SumResult: sum,
+  }
+  return res, nil
+}
+
+func main() {
+  fmt.Println("Calculator Server")
+
+  lis, err := net.Listen("tcp", "0.0.0.0:50051")
+  if err != nil {
+    log.Fatalf("Failed to listen: %v", err)
+  }
+
+  s := grpc.NewServer()
+  calculatorpb.RegisterCalculatorServiceServer(s, &server{})
+
+  if err := s.Serve(lis); err != nil {
+    log.Fatalf("Failed to server: %v", err)
+  }
+}
+```
+
+now we can test the server (and keep it open):
+
+```bash
+$ go run calculator/calculator_server/server.go
+Calculator Server
+```
+
+And, let's write the client:
+
+```go
+package main
+
+import (
+  "context"
+  "fmt"
+  "log"
+
+  "../calculatorpb"
+  "google.golang.org/grpc"
+)
+
+func main() {
+  fmt.Println("Calculator Client")
+  cc, err := grpc.Dial("localhost:50051", grpc.WithInsecure())
+  if err != nil {
+    log.Fatalf("could not connnect: %v", err)
+  }
+  defer cc.Close()
+
+  c := calculatorpb.NewCalculatorServiceClient(cc)
+  // fmt.Printf("Created client: %f", c)
+
+  doUnary(c)
+}
+
+func doUnary(c calculatorpb.CalculatorServiceClient) {
+  fmt.Println("Starting to do a Sum Unary RPC...")
+  req := &calculatorpb.SumRequest{
+    FirstNumber:  5,
+    SecondNumber: 40,
+  }
+  res, err := c.Sum(context.Background(), req)
+  if err != nil {
+    log.Fatalf("error whilst calling Sum RPC: %v", err)
+  }
+  log.Printf("Response from Sum: %v", res.SumResult)
+}
+```
+
+and let's open another terminal and run the `client.go`:
+
+```bash
+$ go run calculator/calculator_client/client.go
+Calculator Client
+Starting to do a Sum Unary RPC...
+2019/08/18 23:18:39 Response from Sum: 45
+```
+
+you can also see message from the other terminal running `server.go`
+
+```bash
+$ go run calculator/calculator_server/server.go
+Calculator Server
+Received Sum RPC: first_number:5 second_number:40
+```
+
+---
