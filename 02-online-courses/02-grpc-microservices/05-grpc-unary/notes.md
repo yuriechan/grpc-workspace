@@ -244,6 +244,16 @@ Greet function was invoked with greeting:<first_name:"Mark" last_name:"Hahn" >
 
 ## 22. [Exercise] Sum API
 
+* implement a Sum RPC Unary API in a `CalculatorService`:
+  * the function takes a `Request` message that has two intergers,
+  * and returns a `Response` that represents the sum of them
+    * remember to first implement the service definition in a `.proto` file, alongside the RPC message
+    * implement the Server code first
+    * test the Server code by implementing the Client
+
+* Example:
+  * the Client will send two numbers (`3` and `10`) and the Server will response with (`13`)
+
 ---
 
 ## 23. [Solution] Sum API
