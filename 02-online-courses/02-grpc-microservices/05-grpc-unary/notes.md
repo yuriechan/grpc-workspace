@@ -110,11 +110,135 @@ func (*server) Greet(ctx context.Context, req *greetpb.GreetRequest) (*greetpb.G
 }
 ```
 
-
-
 ---
 
 ## 21. Unary API Client Implementation
+
+* Hands-on:
+* implement a client call for our Unary RPC
+* test it against our server that is running!
+
+first, add a simple logger in the `greet_server/server.go`
+
+```go
+func (*server) Greet(ctx context.Context, req *greetpb.GreetRequest) (*greetpb.GreetResponse, error) {
+  fmt.Printf("Greet function was invoked with %v\n", req)
+  ...
+}
+```
+
+and let's improve `greet_client/client.go`:
+
+```go
+package main
+
+import (
+  "context"
+  "fmt"
+  "log"
+
+  "../greetpb"
+  "google.golang.org/grpc"
+)
+
+func main() {
+  fmt.Println("Hello, I am a client.")
+
+  cc, err := grpc.Dial("localhost:50051", grpc.WithInsecure()) // WithInsecure() for just now testing
+  if err != nil {
+    log.Fatalf("Could not connect: %v", err)
+  }
+
+  defer cc.Close()
+
+  c := greetpb.NewGreetServiceClient(cc)
+  // fmt.Printf("Created client: %f", c)
+
+  doUnary(c)
+}
+
+func doUnary(c greetpb.GreetServiceClient) {
+  fmt.Println("Starting to do a Unary RPC...")
+  req := &greetpb.GreetRequest{
+    Greeting: &greetpb.Greeting{
+      FirstName: "Mark",
+      LastName:  "Hahn",
+    },
+  }
+  res, err := c.Greet(context.Background(), req)
+  if err != nil {
+    log.Fatalf("error while calling Greet RPC: %v", err)
+  }
+  log.Printf("Response from Greet: %v", res.Result)
+}
+```
+
+and currently, server looks like this:
+
+```go
+package main
+
+import (
+  "context"
+  "fmt"
+  "log"
+  "net"
+
+  "../greetpb"
+
+  "google.golang.org/grpc"
+)
+
+type server struct{}
+
+func (*server) Greet(ctx context.Context, req *greetpb.GreetRequest) (*greetpb.GreetResponse, error) {
+  fmt.Printf("Greet function was invoked with %v\n", req)
+  firstName := req.GetGreeting().GetFirstName()
+  result := "Hello " + firstName
+  res := &greetpb.GreetResponse{
+    Result: result,
+  }
+  return res, nil
+}
+
+func main() {
+  fmt.Println("Hello world!")
+
+  lis, err := net.Listen("tcp", "0.0.0.0:50051") // 50051 is a default port for gRPC
+  if err != nil {
+    log.Fatalf("Failed to listen: %v", err)
+  }
+
+  s := grpc.NewServer()
+  greetpb.RegisterGreetServiceServer(s, &server{})
+
+  if err := s.Serve(lis); err != nil {
+    log.Fatalf("Failed to serve: %v", err)
+  }
+}
+```
+
+open your terminal and run the Server, you will see this:
+
+```bash
+$ go run greet/greet_server/server.go
+Hello world!
+```
+
+and also open another terminal and run your client code:
+
+```bash
+go run greet/greet_client/client.go
+Hello, I am a client.
+Starting to do a Unary RPC...
+2019/08/18 22:11:51 Response from Greet: Hello Mark
+```
+
+and your first terminal, running the server code show this info:
+
+```bash
+Greet function was invoked with greeting:<first_name:"Mark" last_name:"Hahn" >
+```
 
 ---
 
