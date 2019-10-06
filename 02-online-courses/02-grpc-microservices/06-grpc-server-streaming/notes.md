@@ -42,6 +42,58 @@ service GreetService {
 
 ## 25. `GreetManyTimes` API Definition
 
+## 25.1. Hands On: `GreetManyTimes` API Definition
+
+* <u>Hands On</u>: Let's define a Streaming Server "`GreetManyTimes`" API
+* It will take **ONE** `GreetManyTimesRequest` that contains a `Greeting`
+* It will return **MANY** `GreetManyTimesResponse` that contains a result string
+
+## 25.2. `greet.proto`
+
+```proto
+syntax = "proto3";
+
+package greet;
+option go_package="greetpb";
+
+message Greeting {
+    string first_name = 1;
+    string last_name = 2;
+}
+
+message GreetRequest {
+    Greeting greeting = 1;
+}
+
+message GreetResponse {
+    string result = 1;
+}
+
+message GreetManyTimesRequest {
+    Greeting greeting = 1;
+}
+
+message GreetManyTimesResponse {
+    string result = 1;
+}
+
+service GreetService {
+    // Unary
+    rpc Greet(GreetRequest) returns (GreetResponse) {};
+
+    // Server Streaming
+    rpc GreetManyTimes(GreetManyTimesRequest) returns (stream GreetManyTimesResponse) {};
+}
+```
+
+actually in the `rpc GreetManyTimes()GreetManyTimesRequest) returns (stream GreetManyTimesResponse)`, we can reuse `GreetRequest` and `GreetResponse` rather than `GreetManyTimesRequest` and `GreetManyTimesResponse`, respectively, HOWEVER, usually in rpc, when you define a new rpc, you should create new request and response message types.
+
+Next step: in your `generate.sh` file, get this command and run it:
+
+```sh
+protoc greet/greetpb/greet.proto --go_out=plugins=grpc:.
+```
+
 ---
 
 ## 26. Server Streaming API Server Implementation 
