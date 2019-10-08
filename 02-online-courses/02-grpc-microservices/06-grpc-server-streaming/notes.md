@@ -144,6 +144,40 @@ func (*server) GreetManyTimes(req *greetpb.GreetManyTimesRequest, stream greetpb
 
 ## 27. Server Streaming API Client Implementation 
 
+* hands-on:
+* We'll implement a client call for our Streaming Server RPC
+* We'll test it against our server that is running!
+
+```go
+func doServerStreaming(c greetpb.GreetServiceClient) {
+	fmt.Println("Starting to do a Server Streaming RPC...")
+
+	req := &greetpb.GreetManyTimesRequest{
+		Greeting: &greetpb.Greeting{
+			FirstName: "Mark",
+			LastName: "Hahn",
+		},
+	}
+
+	resStream, err := c.GreetManyTimes(context.Background(), req)
+	if err != nil {
+		log.Fatal("error whilst calling GreetManyTimes RPC: %v", err)
+	}
+
+	for {
+		msg, err := resStream.Recv()
+		if err == io.EOF {
+			// we've reached the end of the stream
+			break
+		}
+		if err != nil {
+			log.Fatal("error whilst reading stream: %v", err)
+		}
+		log.Printf("Response from GreetManyTimes: %v", msg.GetResult())
+	}
+}
+```
+
 ---
 
 ## 28. [Exercise] `PrimeNumberDecomposition` API
