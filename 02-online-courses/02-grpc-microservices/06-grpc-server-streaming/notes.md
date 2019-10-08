@@ -98,6 +98,48 @@ protoc greet/greetpb/greet.proto --go_out=plugins=grpc:.
 
 ## 26. Server Streaming API Server Implementation 
 
+if we goes to `greet.pb.go`, we can find `interface` of `GreetServiceServer` and `GreetServerClient` we can find `GreetManyTimes()`
+
+```go
+// GreetServiceServer is the server API for GreetService service.
+type GreetServiceServer interface {
+	// Unary
+	Greet(context.Context, *GreetRequest) (*GreetResponse, error)
+	// Server Streaming
+	GreetManyTimes(*GreetManyTimesRequest, GreetService_GreetManyTimesServer) error
+}
+
+// GreetServiceClient is the client API for GreetService service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
+type GreetServiceClient interface {
+	// Unary
+	Greet(ctx context.Context, in *GreetRequest, opts ...grpc.CallOption) (*GreetResponse, error)
+	// Server Streaming
+	GreetManyTimes(ctx context.Context, in *GreetManyTimesRequest, opts ...grpc.CallOption) (GreetService_GreetManyTimesClient, error)
+}
+```
+
+at first, we need to implement `GreetManyTimes` under `GreetServiceServer`
+
+and we can add this implementation: 
+
+```go
+func (*server) GreetManyTimes(req *greetpb.GreetManyTimesRequest, stream greetpb.GreetService_GreetManyTimesServer) error {
+	fmt.Printf("GreetManyTimes function was invoked with %v\n", req)
+	firstName := req.GetGreeting().GetFirstName()
+	for i := 0; i < 10; i++ {
+		result := "Hello " + firstName + " number " + strconv.Itoa(i)
+		res := &greetpb.GreetManyTimesResponse{
+			Result: result,
+		}
+		stream.Send(res)
+		time.Sleep(1000 * time.Millisecond)
+	}
+	return nil
+}
+```
+
 ---
 
 ## 27. Server Streaming API Client Implementation 
