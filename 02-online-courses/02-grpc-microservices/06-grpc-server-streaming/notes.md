@@ -208,5 +208,70 @@ while N > 1:
 
 ## 29. [Solution] `PrimeNumberDecomposition` API
 
+current `calculator.proto` looks like this:
+
+```proto
+syntax = "proto3";
+
+package calculator;
+option go_package = "calculatorpb";
+
+message SumRequest {
+  int32 first_number = 1;
+  int32 second_number = 2;
+}
+
+message SumResponse {
+  int32 sum_result = 1;
+}
+
+service CalculatorService {
+  rpc Sum(SumRequest) returns (SumResponse) {};
+}
+```
+
+and we need to add: `rpc PrimeNumberDecomposition(PrimeNumberDecompositionRequest) returns (stream PrimeNumberDecompositionResponse) {};`, also define each new message like below:
+
+```proto
+syntax = "proto3";
+
+package calculator;
+option go_package = "calculatorpb";
+
+message SumRequest {
+  int32 first_number = 1;
+  int32 second_number = 2;
+}
+
+message SumResponse {
+  int32 sum_result = 1;
+}
+
+message PrimeNumberDecompositionRequest{
+  int64 number = 1;
+}
+
+message PrimeNumberDecompositionResponse{
+  int64 prime_factor = 1;
+}
+
+service CalculatorService {
+  rpc Sum(SumRequest) returns (SumResponse) {};
+
+  rpc PrimeNumberDecomposition(PrimeNumberDecompositionRequest) returns (stream PrimeNumberDecompositionResponse) {};
+}
+```
+
+then we can generate target code in *.go with this command:
+
+```bash
+protoc calculator/calculatorpb/calculator.proto --go_out=plugins=grpc:.
+```
+
+Now, we can implment the `server.go`: need to implement a new function
+
+
+
+
 ---
  
