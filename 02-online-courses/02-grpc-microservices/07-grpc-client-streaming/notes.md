@@ -43,6 +43,40 @@ service GreetService {
 
 ## 31. `LongGreet` API Definition
 
+## 31.1. Hands On: `LongGreet` API Definition
+
+* Hands On: Let's define a Streaming Client "`LongGreet`" API
+* It will take **MANY** `LongGreetRequest` that contains a `Greeting`
+* It will return **ONE** `LongGreetResponse` that contains a result string
+
+```proto
+...
+
+message LongGreetRequest {
+  Greeting greeting = 1;
+}
+
+message LongGreetResponse {
+  string retult = 1;
+}
+
+service GreetService {
+  
+  ...
+
+  // Client Streaming
+  rpc LongGreet(stream LongGreetRequest) returns LongGreetResponse) {};
+}
+```
+
+then run the command to generate new code:
+
+```bash
+protoc greet/greetpb/greet.proto --go_out=plugins=grpc:.
+```
+
+and you can see the generated code with new functions for `LongGreet`.
+
 ---
 
 ## 32. Client Streaming API Server Implementation
