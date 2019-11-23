@@ -48,7 +48,7 @@ func doServerStreaming(c greetpb.GreetServiceClient) {
 	req := &greetpb.GreetManyTimesRequest{
 		Greeting: &greetpb.Greeting{
 			FirstName: "Mark",
-			LastName: "Hahn",
+			LastName:  "Hahn",
 		},
 	}
 

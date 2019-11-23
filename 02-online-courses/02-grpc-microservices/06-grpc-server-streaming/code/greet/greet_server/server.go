@@ -3,10 +3,10 @@ package main
 import (
 	"context"
 	"fmt"
-	"time"
 	"log"
 	"net"
 	"strconv"
+	"time"
 
 	"../greetpb"
 
