@@ -29,7 +29,7 @@ message LongGreetRequest {
 }
 
 message LongGreetResponse {
-  string retult = 1;
+  string result = 1;
 }
 
 service GreetService {
