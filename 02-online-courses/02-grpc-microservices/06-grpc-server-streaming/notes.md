@@ -25,7 +25,7 @@
 
 ```proto
 message GreetManyTimesRequest {
-    Greeting greeting = 1;
+  Greeting greeting = 1;
 }
 
 message GreetManyTimesResponse {
@@ -33,8 +33,8 @@ message GreetManyTimesResponse {
 }
 
 service GreetService {
-    // Streaming Server
-    rpc GreetManyTimes(GreetManyTimesRequest) returns (stream GreetManyTimesRequest) {};
+  // Streaming Server
+  rpc GreetManyTimes(GreetManyTimesRequest) returns (stream GreetManyTimesRequest) {};
 }
 ```
 
@@ -57,32 +57,32 @@ package greet;
 option go_package="greetpb";
 
 message Greeting {
-    string first_name = 1;
-    string last_name = 2;
+  string first_name = 1;
+  string last_name = 2;
 }
 
 message GreetRequest {
-    Greeting greeting = 1;
+  Greeting greeting = 1;
 }
 
 message GreetResponse {
-    string result = 1;
+  string result = 1;
 }
 
 message GreetManyTimesRequest {
-    Greeting greeting = 1;
+  Greeting greeting = 1;
 }
 
 message GreetManyTimesResponse {
-    string result = 1;
+  string result = 1;
 }
 
 service GreetService {
-    // Unary
-    rpc Greet(GreetRequest) returns (GreetResponse) {};
+  // Unary
+  rpc Greet(GreetRequest) returns (GreetResponse) {};
 
-    // Server Streaming
-    rpc GreetManyTimes(GreetManyTimesRequest) returns (stream GreetManyTimesResponse) {};
+  // Server Streaming
+  rpc GreetManyTimes(GreetManyTimesRequest) returns (stream GreetManyTimesResponse) {};
 }
 ```
 
@@ -103,20 +103,20 @@ if we goes to `greet.pb.go`, we can find `interface` of `GreetServiceServer` and
 ```go
 // GreetServiceServer is the server API for GreetService service.
 type GreetServiceServer interface {
-	// Unary
-	Greet(context.Context, *GreetRequest) (*GreetResponse, error)
-	// Server Streaming
-	GreetManyTimes(*GreetManyTimesRequest, GreetService_GreetManyTimesServer) error
+  // Unary
+  Greet(context.Context, *GreetRequest) (*GreetResponse, error)
+  // Server Streaming
+  GreetManyTimes(*GreetManyTimesRequest, GreetService_GreetManyTimesServer) error
 }
 
 // GreetServiceClient is the client API for GreetService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type GreetServiceClient interface {
-	// Unary
-	Greet(ctx context.Context, in *GreetRequest, opts ...grpc.CallOption) (*GreetResponse, error)
-	// Server Streaming
-	GreetManyTimes(ctx context.Context, in *GreetManyTimesRequest, opts ...grpc.CallOption) (GreetService_GreetManyTimesClient, error)
+  // Unary
+  Greet(ctx context.Context, in *GreetRequest, opts ...grpc.CallOption) (*GreetResponse, error)
+  // Server Streaming
+  GreetManyTimes(ctx context.Context, in *GreetManyTimesRequest, opts ...grpc.CallOption) (GreetService_GreetManyTimesClient, error)
 }
 ```
 
@@ -126,17 +126,17 @@ and we can add this implementation:
 
 ```go
 func (*server) GreetManyTimes(req *greetpb.GreetManyTimesRequest, stream greetpb.GreetService_GreetManyTimesServer) error {
-	fmt.Printf("GreetManyTimes function was invoked with %v\n", req)
-	firstName := req.GetGreeting().GetFirstName()
-	for i := 0; i < 10; i++ {
-		result := "Hello " + firstName + " number " + strconv.Itoa(i)
-		res := &greetpb.GreetManyTimesResponse{
-			Result: result,
-		}
-		stream.Send(res)
-		time.Sleep(1000 * time.Millisecond)
-	}
-	return nil
+  fmt.Printf("GreetManyTimes function was invoked with %v\n", req)
+  firstName := req.GetGreeting().GetFirstName()
+  for i := 0; i < 10; i++ {
+    result := "Hello " + firstName + " number " + strconv.Itoa(i)
+    res := &greetpb.GreetManyTimesResponse{
+      Result: result,
+    }
+    stream.Send(res)
+    time.Sleep(1000 * time.Millisecond)
+  }
+  return nil
 }
 ```
 
@@ -150,31 +150,31 @@ func (*server) GreetManyTimes(req *greetpb.GreetManyTimesRequest, stream greetpb
 
 ```go
 func doServerStreaming(c greetpb.GreetServiceClient) {
-	fmt.Println("Starting to do a Server Streaming RPC...")
+  fmt.Println("Starting to do a Server Streaming RPC...")
 
-	req := &greetpb.GreetManyTimesRequest{
-		Greeting: &greetpb.Greeting{
-			FirstName: "Mark",
-			LastName: "Hahn",
-		},
-	}
+  req := &greetpb.GreetManyTimesRequest{
+    Greeting: &greetpb.Greeting{
+      FirstName: "Mark",
+      LastName: "Hahn",
+    },
+  }
 
-	resStream, err := c.GreetManyTimes(context.Background(), req)
-	if err != nil {
-		log.Fatal("error whilst calling GreetManyTimes RPC: %v", err)
-	}
+  resStream, err := c.GreetManyTimes(context.Background(), req)
+  if err != nil {
+    log.Fatal("error whilst calling GreetManyTimes RPC: %v", err)
+  }
 
-	for {
-		msg, err := resStream.Recv()
-		if err == io.EOF {
-			// we've reached the end of the stream
-			break
-		}
-		if err != nil {
-			log.Fatal("error whilst reading stream: %v", err)
-		}
-		log.Printf("Response from GreetManyTimes: %v", msg.GetResult())
-	}
+  for {
+    msg, err := resStream.Recv()
+    if err == io.EOF {
+      // we've reached the end of the stream
+      break
+    }
+    if err != nil {
+      log.Fatal("error whilst reading stream: %v", err)
+    }
+    log.Printf("Response from GreetManyTimes: %v", msg.GetResult())
+  }
 }
 ```
 
@@ -197,11 +197,11 @@ func doServerStreaming(c greetpb.GreetServiceClient) {
 k = 2
 N = 210
 while N > 1:
-    if N % k == 0:   // if k evenly divides into N
-        print k      // this is a factor
-        N = N / k    // divide N by k so that we have the rest of the number left.
-    else:
-        k = k + 1
+  if N % k == 0:   // if k evenly divides into N
+    print k      // this is a factor
+    N = N / k    // divide N by k so that we have the rest of the number left.
+  else:
+    k = k + 1
 ```
 
 ---
@@ -268,10 +268,6 @@ then we can generate target code in *.go with this command:
 protoc calculator/calculatorpb/calculator.proto --go_out=plugins=grpc:.
 ```
 
-Now, we can implment the `server.go`: need to implement a new function
-
-
-
+Now, we can implement the `server.go`: need to implement a new function
 
 ---
- 
