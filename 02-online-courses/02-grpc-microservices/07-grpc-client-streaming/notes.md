@@ -130,6 +130,122 @@ Hello World
 
 ## 33. Client Streaming API Client Implementation
 
+### 33.1. Streaming Client API: Client Implementation
+
+* Hands-on:
+* We'll implement a client call for our Streaming Client RPC
+* We'll test against our server that is running!
+
+let's start with `greet/greet_client/client.go` and add these code:
+
+```go
+func doClientStreaming(c greetpb.GreetServiceClient) {
+  fmt.Println("Starting to do a Client Streaming RPC...")
+
+  requests := []*greetpb.LongGreetRequest{
+    &greetpb.LongGreetRequest{
+      Greeting: &greetpb.Greeting{
+        FirstName: "Mark",
+      },
+    },
+    &greetpb.LongGreetRequest{
+      Greeting: &greetpb.Greeting{
+        FirstName: "Chris",
+      },
+    },
+    &greetpb.LongGreetRequest{
+      Greeting: &greetpb.Greeting{
+        FirstName: "JD",
+      },
+    },
+    &greetpb.LongGreetRequest{
+      Greeting: &greetpb.Greeting{
+        FirstName: "Stephan",
+      },
+    },
+    &greetpb.LongGreetRequest{
+      Greeting: &greetpb.Greeting{
+        FirstName: "Deepak",
+      },
+    },
+  }
+
+  stream, err := c.LongGreet(context.Background())  // since it's streaming, req it not required
+  if err != nil {
+    log.Fatalf("error whlist calling LongGreet: %v", err)
+  }
+
+  for _, req := range requests {
+    fmt.Println("Sending req: %v\n", req)
+    stream.Send(req)
+    time.Sleep(1000 * time.Millisecond)
+  }
+
+  res, err := stream.CloseAndRecv()
+  if err != nil {
+    log.Fatalf("error whilst receiving response from LongGreet: %v", err)
+  }
+  fmt.Printf("LongGreet Response: %v\n", res)
+}
+```
+
+and let's revise the `main()` function:
+
+```go
+func main() {
+  fmt.Println("Hello, I am a client.")
+
+  cc, err := grpc.Dial("localhost:50051", grpc.WithInsecure()) // WithInsecure() for just now testing
+  if err != nil {
+    log.Fatalf("Could not connect: %v", err)
+  }
+
+  defer cc.Close()
+
+  c := greetpb.NewGreetServiceClient(cc)
+  // fmt.Printf("Created client: %f", c)
+
+  // doUnary(c)
+  // doServerStreaming(c)
+  doClientStreaming(c)
+}
+```
+
+now we need to do:
+
+1. run the server: `go run greet/greet_server/server.go`
+2. run the client: `go run greet/greet_client/client.go`
+
+when you run the server, you can only get this message from `main()` function:
+
+```bash
+Hello world!
+```
+
+then, in another terminal, run the client, you get this message at a terminal that runs server:
+
+```bash
+LongGreet function was invoked with a streaming request
+```
+
+in the terminal that runs the client you can see:
+
+```bash
+Hello, I am a client.
+Starting to do a Client Streaming RPC...
+Sending req: %v
+ greeting:<first_name:"Mark" >
+Sending req: %v
+ greeting:<first_name:"Chris" >
+Sending req: %v
+ greeting:<first_name:"JD" >
+Sending req: %v
+ greeting:<first_name:"Stephan" >
+Sending req: %v
+ greeting:<first_name:"Deepak" >
+LongGreet Response: result:"Hello Mark! Hello Chris! Hello JD! Hello Stephan! Hello Deepak! "
+```
+
 ---
 
 ## 34. [Exercise] `ComputeAverage` API
