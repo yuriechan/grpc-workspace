@@ -21,7 +21,7 @@
 ```
 
 * in gRPC Server Streaming Calls are defined using the keyword "`stream`"
-* as for each RPC call, we have to define a "Request" message and a "Response" messsage.
+* as for each RPC call, we have to define a "Request" message and a "Response" message.
 
 ```proto
 message GreetManyTimesRequest {
