@@ -81,6 +81,51 @@ and you can see the generated code with new functions for `LongGreet`.
 
 ## 32. Client Streaming API Server Implementation
 
+### 32.1. Streaming Client API: Server Implementation
+
+* Hands-on:
+* We'll implement a Streaming Client `LongGreet` RPC
+* As we'll see the API implementation will be a bit more difficult
+* **NOTE**: the server will only respond to the client once the client is done sending request.
+  * (but in theory, the server can respond whenever it wants.)
+
+let's start with `greet/greet_server/server.go` and add these code:
+
+```go
+func (*server) LongGreet(stream greetpb.GreetService_LongGreetServer) error {
+  fmt.Printf("LongGreet function was invoked with a streaming request\n")
+  result := ""
+
+  for {
+    req, err := stream.Recv()
+    if err == io.EOF {
+      // we have finished reading the client stream
+      return stream.SendAndClose(&greetpb.LongGreetResponse{
+        Result: result,
+      })
+    }
+    if err != nil {
+      log.Fatalf("Error whilst reading client stream: %v", err)
+    }
+
+    firstName := req.GetGreeting().GetFirstName()
+    result += "Hello " + firstName + "! "
+  }
+}
+```
+
+then make sure the server is runnable:
+
+```bash
+go run greet/greet_server/server.go
+```
+
+You'll see this message (printed by `main()`):
+
+```bash
+Hello World
+```
+
 ---
 
 ## 33. Client Streaming API Client Implementation
