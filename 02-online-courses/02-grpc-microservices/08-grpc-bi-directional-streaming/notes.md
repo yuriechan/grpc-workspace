@@ -127,6 +127,117 @@ now, it's ready to use.
 
 ## 39. Bi-Directional Streaming API Client Implementation
 
+* Hands-on:
+* We'll implement a client call for our Bi Directional Streaming RPC
+* We'll test it against our server that is running!
+
+let's work with the exisitng client code: `greet/greet_client/client.go`
+
+```go
+func doBiDiStreaming(c greetpb.GreetServiceClient) {
+  fmt.Println("Starting to do a BiDi Streaming RPC...")
+
+  // we create a stream by invoking the client
+  stream, err := c.GreetEveryone(context.Background())
+  if err != nil {
+    log.Fatalf("Error whilst creating stream: %v", err)
+  }
+
+  requests := []*greetpb.GreetEveryoneRequest{
+    &greetpb.GreetEveryoneRequest{
+        Greeting: &greetpb.Greeting{
+        FirstName: "Mark",
+      },
+    },
+    &greetpb.GreetEveryoneRequest{
+      Greeting: &greetpb.Greeting{
+        FirstName: "Chris",
+      },
+    },
+    &greetpb.GreetEveryoneRequest{
+      Greeting: &greetpb.Greeting{
+        FirstName: "JD",
+      },
+    },
+    &greetpb.GreetEveryoneRequest{
+      Greeting: &greetpb.Greeting{
+        FirstName: "Stephan",
+      },
+    },
+    &greetpb.GreetEveryoneRequest{
+      Greeting: &greetpb.Greeting{
+        FirstName: "Deepak",
+      },
+    },
+  }
+
+  waitc := make(chan struct{})
+  // we send a bunch of messages to the client (go routine)
+  go func() {
+    // function to send a bunch of messages
+    for _, req := range requests {
+      fmt.Printf("Sending message: %v\n", req)
+      stream.Send(req)
+      time.Sleep(1000 * time.Millisecond)
+    }
+    stream.CloseSend()
+  }()
+
+  // we receive a bunch of messages from the client (go routine)
+  go func() {
+    // function to receive a bunch of messages
+    for {
+      res, err := stream.Recv()
+      if err == io.EOF {
+        break
+      }
+      if err != nil {
+        log.Fatalf("Error whilst receiving: %v", err)
+        break
+      }
+      fmt.Printf("Received: %v", res.GetResult())
+    }
+    close(waitc)
+  }()
+
+  // block until everyone is done
+  <-waitc
+}
+```
+
+and let's run the server:
+
+```bash
+$ go run greet/greet_server/server.go
+Hello world!
+```
+
+and the client
+
+```bash
+$ go run greet/greet_client/client.go
+Hello, I am a client.
+Starting to do a BiDi Streaming RPC...
+Sending message: greeting:<first_name:"Mark" >
+Received: Hello Mark!
+Sending message: greeting:<first_name:"Chris" >
+Received: Hello Chris!
+Sending message: greeting:<first_name:"JD" >
+Received: Hello JD!
+Sending message: greeting:<first_name:"Stephan" >
+Received: Hello Stephan!
+Sending message: greeting:<first_name:"Deepak" >
+Received: Hello Deepak!
+```
+
+and the server-side terminal get these messages:
+
+```bash
+$ go run greet/greet_server/server.go
+Hello world!
+GreetEveryone function was invoked with a streaming request
+```
+
 ---
 
 ## 40. [Exercise] `FindMaximum` API
