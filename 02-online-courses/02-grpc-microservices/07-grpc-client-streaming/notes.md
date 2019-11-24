@@ -177,7 +177,7 @@ func doClientStreaming(c greetpb.GreetServiceClient) {
   }
 
   for _, req := range requests {
-    fmt.Println("Sending req: %v\n", req)
+    fmt.Printf("Sending req: %v\n", req)
     stream.Send(req)
     time.Sleep(1000 * time.Millisecond)
   }
@@ -291,7 +291,7 @@ then we can generate code:
 protoc calculator/calculatorpb/calculator.proto --go_out=plugins=grpc:.
 ```
 
-then, we need to impement the server: `calculator/calculator_server/server.go`
+then, we need to implement the server: `calculator/calculator_server/server.go`
 
 ```go
 func (*server) ComputeAverage(stream calculatorpb.CalculatorService_ComputeAverageServer) error {

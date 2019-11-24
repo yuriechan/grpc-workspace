@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"time"
 
 	"../greetpb"
 	"google.golang.org/grpc"
@@ -24,8 +25,8 @@ func main() {
 	// fmt.Printf("Created client: %f", c)
 
 	// doUnary(c)
-  // doServerStreaming(c)
-  doClientStreaming(c)
+	// doServerStreaming(c)
+	doClientStreaming(c)
 }
 
 func doUnary(c greetpb.GreetServiceClient) {
@@ -72,50 +73,50 @@ func doServerStreaming(c greetpb.GreetServiceClient) {
 }
 
 func doClientStreaming(c greetpb.GreetServiceClient) {
-  fmt.Println("Starting to do a Client Streaming RPC...")
+	fmt.Println("Starting to do a Client Streaming RPC...")
 
-  requests := []*greetpb.LongGreetRequest{
-    &greetpb.LongGreetRequest{
-      Greeting: &greetpb.Greeting{
-        FirstName: "Mark",
-      },
-    },
-    &greetpb.LongGreetRequest{
-      Greeting: &greetpb.Greeting{
-        FirstName: "Chris",
-      },
-    },
-    &greetpb.LongGreetRequest{
-      Greeting: &greetpb.Greeting{
-        FirstName: "JD",
-      },
-    },
-    &greetpb.LongGreetRequest{
-      Greeting: &greetpb.Greeting{
-        FirstName: "Stephan",
-      },
-    },
-    &greetpb.LongGreetRequest{
-      Greeting: &greetpb.Greeting{
-        FirstName: "Deepak",
-      },
-    },
-  }
+	requests := []*greetpb.LongGreetRequest{
+		&greetpb.LongGreetRequest{
+			Greeting: &greetpb.Greeting{
+				FirstName: "Mark",
+			},
+		},
+		&greetpb.LongGreetRequest{
+			Greeting: &greetpb.Greeting{
+				FirstName: "Chris",
+			},
+		},
+		&greetpb.LongGreetRequest{
+			Greeting: &greetpb.Greeting{
+				FirstName: "JD",
+			},
+		},
+		&greetpb.LongGreetRequest{
+			Greeting: &greetpb.Greeting{
+				FirstName: "Stephan",
+			},
+		},
+		&greetpb.LongGreetRequest{
+			Greeting: &greetpb.Greeting{
+				FirstName: "Deepak",
+			},
+		},
+	}
 
-  stream, err := c.LongGreet(context.Background())  // since it's streaming, req it not required
-  if err != nil {
-    log.Fatalf("error whlist calling LongGreet: %v", err)
-  }
+	stream, err := c.LongGreet(context.Background()) // since it's streaming, req it not required
+	if err != nil {
+		log.Fatalf("error whlist calling LongGreet: %v", err)
+	}
 
-  for _, req := range requests {
-    fmt.Println("Sending req: %v\n", req)
-    stream.Send(req)
-    time.Sleep(1000 * time.Millisecond)
-  }
+	for _, req := range requests {
+		fmt.Printf("Sending req: %v\n", req)
+		stream.Send(req)
+		time.Sleep(1000 * time.Millisecond)
+	}
 
-  res, err := stream.CloseAndRecv()
-  if err != nil {
-    log.Fatalf("error whilst receiving response from LongGreet: %v", err)
-  }
-  fmt.Printf("LongGreet Response: %v\n", res)
+	res, err := stream.CloseAndRecv()
+	if err != nil {
+		log.Fatalf("error whilst receiving response from LongGreet: %v", err)
+	}
+	fmt.Printf("LongGreet Response: %v\n", res)
 }
