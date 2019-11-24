@@ -13,6 +13,7 @@
   * when the server needs to "PUSH" data to the client without having the client request for more (e.g. live feed, chat, etc.)
 
 ```note
+              Server Streaming API
 ************                               ************
 *          * -------> req 0 -------------> *          *
 *  client  *                               *  server  *

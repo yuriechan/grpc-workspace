@@ -14,8 +14,9 @@
   * when the client needs to "PUSH" data to the server without really expecting a response
 
 ```note
+              Client Streaming API
 ************                               ************
-*          * --> req 0, 1, 2, 3, ... ----> *          *
+*          * --> req ..., 3, 2, 1, 0 ----> *          *
 *  client  *                               *  server  *
 *          * <-- resp 0 <----------------- *          *
 ************                               ************
