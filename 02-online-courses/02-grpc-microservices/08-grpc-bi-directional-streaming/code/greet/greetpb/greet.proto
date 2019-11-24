@@ -33,7 +33,7 @@ message LongGreetResponse {
 }
 
 message GreetEveryoneRequest {
-  string greeting = 1;
+  Greeting greeting = 1;
 }
 
 message GreetEveryoneResponse {

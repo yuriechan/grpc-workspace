@@ -81,6 +81,48 @@ then we get the newly generated code: `greet/greetpb/greet.pb.go`
 
 ## 38. Bi-Directional Streaming API Server Implementation
 
+* Hands-on:
+* We'll implement a Bi Directional Streaming `GreetEveryone` RPC
+* **NOTE**: although we will respond to every message in this example, it is not necessary to do so, and the server is free to choose how many responses to send for each client message
+
+let's have a look: `greet/greet_server/server.go`
+
+```go
+func (*server) GreetEveryone(stream greetpb.GreetService_GreetEveryoneServer) error {
+  fmt.Printf("GreetEveryone function was invoked with a streaming request\n")
+  
+  for {
+    req, err := stream.Recv()
+    if err == io.EOF {
+      return nil
+    }
+    if err != nil {
+      log.Fatalf("Error whilst reading client stream: %v", err)
+      return err
+    }
+    firstName := req.GetGreeting().GetFirstName()
+    result := "Hello " + firstName + "! "
+
+    sendErr := stream.Send(&greetpb.GreetEveryoneResponse{
+      Result: result,
+    })
+    if sendErr != nil {
+      log.Fatalf("Error whilst sending data to client: %v", err)
+      return err
+    }
+  }
+}
+```
+
+and let's see this server compiles and run well:
+
+```bash
+$ go run greet/greet_server/server.go
+Hello world!
+```
+
+now, it's ready to use.
+
 ---
 
 ## 39. Bi-Directional Streaming API Client Implementation
