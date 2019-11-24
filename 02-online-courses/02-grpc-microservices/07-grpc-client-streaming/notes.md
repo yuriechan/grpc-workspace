@@ -263,4 +263,141 @@ LongGreet Response: result:"Hello Mark! Hello Chris! Hello JD! Hello Stephan! He
 
 ## 35. [Solution] `ComputeAverage` API
 
+First, let's improve `calculator/calculatorpb/calculator.proto` file:
+
+```proto
+message ComputeAverageRequest{
+  int32 number = 1;
+}
+
+message ComputeAverageResponse{
+  double average = 1;
+}
+
+service CalculatorService {
+  
+  ...  
+  
+  rpc ComputeAverage(stream ComputeAverageRequest) returns (ComputeAverageResponse) {};
+}
+```
+
+We add the new messages as Request and Response for the `ComputeAverage`.
+
+then we can generate code:
+
+```bash
+protoc calculator/calculatorpb/calculator.proto --go_out=plugins=grpc:.
+```
+
+then, we need to impement the server: `calculator/calculator_server/server.go`
+
+```go
+func (*server) ComputeAverage(stream calculatorpb.CalculatorService_ComputeAverageServer) error {
+  fmt.Printf("Received ComputeAverage RPC: %v\n")
+
+  sum := int32(0)
+  count := 0
+
+  for {
+    req, err := stream.Recv()
+    if err == io.EOF {
+      average = float64(sum) / count
+      return stream.SendAndClose(&calculatorpb.ComputeAverageResponse{
+        Average: average, 
+      })
+    }
+    if err != nil {
+      log.Fatalf("Error whilst reading client stream: %v", err)
+    }
+    sum += req.GetNumber()
+    count++
+  }
+}
+```
+
+The next is implementing the client: `calculator/calculator_client/client.go`
+
+```go
+func doClientStreaming(c calculatorpb.CalculatorServiceClient) {
+  fmt.Println("Starting to do a ComputeAverage Client Streaming RPC...")
+
+  stream, err := c.ComputeAverage(context.Background())
+  if err != nil {
+    log.Fatalf("Error whlist opening stream: %v", err)
+  }
+
+  numbers := []int32{3, 5, 9, 54, 23}
+
+  for _, number := range numbers {
+    fmt.Printf("Sending number: %v\n", number  )
+    stream.Send(&calculatorpb.ComputeAverageRequest{
+      Number: number,
+    })
+  }
+
+  res, err := stream.CloseAndRecv()
+  if err != nil {
+    log.Fatalf("Error whlist receiving response: %v", err)
+  }
+
+  fmt.Printf("The Average is: %v\n", res.GetAverage())
+}
+```
+
+and update `main()` function:
+
+```go
+func main() {
+  fmt.Println("Calculator Client")
+  cc, err := grpc.Dial("localhost:50051", grpc.WithInsecure())
+  if err != nil {
+    log.Fatalf("could not connnect: %v", err)
+  }
+  defer cc.Close()
+
+  c := calculatorpb.NewCalculatorServiceClient(cc)
+  // fmt.Printf("Created client: %f", c)
+
+  // doUnary(c)
+
+  // doServerStreaming(c)
+  doClientStreaming(c)
+}
+```
+
+Now, since the server and client is ready, we can run the server and client respectively.
+
+```bash
+go run calculator/calculator_server/server.go
+```
+
+```bash
+go run calculator/calculator_client/client.go
+```
+
+as soon as you run the server, you'll see:
+
+```bash
+Calculator Server
+```
+
+and you can run the client:
+
+```bash
+Starting to do a ComputeAverage Client Streaming RPC...
+Sending number: 3
+Sending number: 5
+Sending number: 9
+Sending number: 54
+Sending number: 23
+The Average is: 18.8
+```
+
+the server side also shows:
+
+```bash
+Received ComputeAverage RPC
+```
+
 ---
