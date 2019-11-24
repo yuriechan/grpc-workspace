@@ -45,6 +45,38 @@ service GreetService {
 
 ## 37. `GreetEveryone` API Definition
 
+* Hands-on: Let's define a Bi Directional Streaming "`GreetEveryone`" API
+* It will take **MANY** `GreetEveryoneRequest` that contains a `Greeting`
+* It will return **MANY** `GreetEveryoneResponse` that contains a result string
+
+starting with the `greet/greetpb/greet.proto` file, let's add additional code:
+
+```proto
+...
+
+message GreetEveryoneRequest {
+  string greeting = 1;
+}
+
+message GreetEveryoneResponse {
+  string result = 1;
+}
+
+service GreetService{
+  ...
+
+  // BiDi Streaming
+  rpc GreetEveryone(stream GreetEveryoneRequest) returns (stream GreetEveryoneResponse) {};
+}
+
+then, make sure to generate code again without any issue:
+
+```bash
+protoc greet/greetpb/greet.proto --go_out=plugins=grpc:.
+```
+
+then we get the newly generated code: `greet/greetpb/greet.pb.go`
+
 ---
 
 ## 38. Bi-Directional Streaming API Server Implementation
