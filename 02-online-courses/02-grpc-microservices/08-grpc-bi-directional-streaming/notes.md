@@ -255,4 +255,141 @@ GreetEveryone function was invoked with a streaming request
 
 ## 41. [Solution] `FindMaximum` API
 
+Let's work with the `calculator/calculatorpb/calculator.proto` first.
+
+```proto
+...
+
+message FindMaximumRequest {
+  int32 number = 1;
+}
+
+message FindMaximumResponse {
+  int32 maximum = 1;
+}
+
+service CalculatorService {
+
+  ...
+
+  rpc FindMaximum(stream FindMaximumRequest) returns (stream FindMaximumResponse) {};
+}
+```
+
+and generate the code:
+
+```bash
+protoc calculator/calculatorpb/calculator.proto --go_out=plugins=grpc:.
+```
+
+then we should implement `calculator/calculator_server/server.go`
+
+```go
+func (*server) FindMaximum(stream calculatorpb.CalculatorService_FindMaximumServer) error {
+  fmt.Println("Received FindMaximum RPC\n")
+  maximum := int32(0)
+
+  for {
+    req, err := stream.Recv()
+    if err == io.EOF {
+      return nil
+    }
+    if err != nil {
+      log.Fatalf("Error whilst reading client stream: %v", err)
+      return err
+    }
+    number := req.GetNumber()
+    if number > maximum {
+      maximum = number
+      sendErr := stream.Send(&calculatorpb.FindMaximumResponse{
+        Maximum: maximum,
+      })
+      if sendErr != nil {
+        log.Fatalf("Error whilst sending data to client: %v", err)
+        return err
+      }
+    }
+  }
+}
+```
+
+and then, `calculator/calculator_client/client.go`
+
+```go
+func doBiDiStreaming(c calculatorpb.CalculatorServiceClient) {
+  fmt.Println("Starting to do a FindMaximum BiDi Streaming RPC...")
+
+  stream, err := c.FindMaximum(context.Background())
+
+  if err != nil {
+    log.Fatalf("Error whlist opening stream and calling FindMaximum: %v", err)
+  }
+
+  waitc := make(chan struct{})
+
+  // send go routine
+  go func() {
+    numbers := []int32{4, 7, 2, 19, 4, 6, 32}
+    for _, number := range numbers {
+      fmt.Printf("Sending number: %v\n", number)
+      stream.Send(&calculatorpb.FindMaximumRequest{
+        Number: number,
+      })
+      time.Sleep(1000 * time.Millisecond)
+    }
+    stream.CloseSend()
+  }()
+
+  // receive go routine
+  go func() {
+    for {
+      res, err := stream.Recv()
+      if err == io.EOF {
+        break
+      }
+      if err != nil {
+        log.Fatalf("Problem whilst reading server stream: %v", err)
+        break
+      }
+      maximum := res.GetMaximum()
+      fmt.Printf("Received a new maximum of...: %v\n", maximum)
+    }
+    close(waitc)
+  }()
+  <-waitc
+}
+```
+
+then let's run the server:
+
+```bash
+$ go run calculator/calculator_server/server.go
+Calculator Server
+```
+
+and run the client:
+
+```bash
+$ go run calculator/calculator_client/client.go 
+Calculator Client
+Starting to do a FindMaximum BiDi Streaming RPC...
+Sending number: 4
+Received a new maximum of...: 4
+Sending number: 7
+Received a new maximum of...: 7
+Sending number: 2
+Sending number: 19
+Received a new maximum of...: 19
+Sending number: 4
+Sending number: 6
+Sending number: 32
+Received a new maximum of...: 32
+```
+
+You'll also see this message from server-side:
+
+```bash
+Received FindMaximum RPC
+```
+
 ---
