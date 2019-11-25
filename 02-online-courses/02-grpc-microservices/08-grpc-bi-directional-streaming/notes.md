@@ -242,6 +242,15 @@ GreetEveryone function was invoked with a streaming request
 
 ## 40. [Exercise] `FindMaximum` API
 
+* **Goal**: to implement a `FindMaximum` RPC Bi-Directional Streaming API in a `CalculatorService`:
+  * the function takes a stream of request message that has one integer, and returns a stream of responses that represent the current maximum between all these integers
+  * remember to first implement the service definition in a `.proto` file, alongside the RPC message
+  * implement the Server code first
+  * Test the server code by implementing the Client
+
+* Example:
+  * The client will send a stream of number `(1,5,3,6,2,20)` and the server will respond with a stream of `(1,5,6,20)`.
+
 ---
 
 ## 41. [Solution] `FindMaximum` API
