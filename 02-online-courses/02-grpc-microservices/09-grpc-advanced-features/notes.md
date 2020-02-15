@@ -2,11 +2,11 @@
 
 ---
 
-## 42. [Theory] Errors in gRPC
+## 43. [Theory] Errors in gRPC
 
-### 42.1. Error Codes
+### 43.1. Error Codes
 
-#### 42.1.1. Conventional HTTP Errors
+#### 43.1.1. Conventional HTTP Errors
 
 * It is common for your API to something return error codes
 * in HTTP, there are **many** error codes
@@ -16,7 +16,7 @@
   * 5xx for ...
 * Whilst HTTP codes are standardisied, they are not usually clear enough
 
-#### 42.1.2. gRPC Errors
+#### 43.1.2. gRPC Errors
 
 * with gRPC, there are a few error codes:
   * https://grpc.io/docs/guides/error.html
@@ -57,16 +57,16 @@
 
 ---
 
-## 43. [Hands-On] Errors implementation
+## 44. [Hands-On] Errors implementation
 
-### 43.1. Error Codes: Hands-On
+### 44.1. Error Codes: Hands-On
 
 * let's implement an error message for a new `SquareRoot` Unary API
 * we'll create `SquareRoot` RPC
 * we'll implement `Server` with the error handling
 * we'll implement `Client` with the error handling
 
-### 43.2. the Implementation
+### 44.2. the Implementation
 
 * define the `SquareRoot` RPC first, with unary req and resp):
 
@@ -91,3 +91,5 @@ service CalculatorService {
 ```bash
 protoc calculator/calculatorpb/calculator.proto --go_out=plugins=grpc:.
 ```
+
+---
