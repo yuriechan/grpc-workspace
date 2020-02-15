@@ -56,3 +56,38 @@
 | Error parsing request protocol buffer | `GRPC_STATUS_INTERNAL`
 
 ---
+
+## 43. [Hands-On] Errors implementation
+
+### 43.1. Error Codes: Hands-On
+
+* let's implement an error message for a new `SquareRoot` Unary API
+* we'll create `SquareRoot` RPC
+* we'll implement `Server` with the error handling
+* we'll implement `Client` with the error handling
+
+### 43.2. the Implementation
+
+* define the `SquareRoot` RPC first, with unary req and resp):
+
+```proto
+message SquareRootRequest {
+  int32 number = 1;
+}
+
+message SquareRootResponse {
+  double number_root = 1;
+}
+
+service CalculatorService {
+  ... // previous RPC definitions
+
+  rpc SquareRoot(SquareRootRequest) returns (SquareRootResponse){};
+}
+```
+
+* generate `caculator.pb` by using:
+
+```bash
+protoc calculator/calculatorpb/calculator.proto --go_out=plugins=grpc:.
+```
