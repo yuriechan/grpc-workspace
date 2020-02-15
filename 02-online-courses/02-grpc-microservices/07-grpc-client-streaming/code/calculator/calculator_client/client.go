@@ -14,7 +14,7 @@ func main() {
 	fmt.Println("Calculator Client")
 	cc, err := grpc.Dial("localhost:50051", grpc.WithInsecure())
 	if err != nil {
-		log.Fatalf("could not connnect: %v", err)
+		log.Fatalf("could not connect: %v", err)
 	}
 	defer cc.Close()
 
