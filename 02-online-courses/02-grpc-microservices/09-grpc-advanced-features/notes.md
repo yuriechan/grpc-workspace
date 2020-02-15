@@ -68,9 +68,13 @@
 
 ### 44.2. the Implementation
 
+#### 44.2.1. Protobuf
+
 * define the `SquareRoot` RPC first, with unary req and resp):
 
 ```proto
+...
+
 message SquareRootRequest {
   int32 number = 1;
 }
@@ -90,6 +94,154 @@ service CalculatorService {
 
 ```bash
 protoc calculator/calculatorpb/calculator.proto --go_out=plugins=grpc:.
+```
+
+* One of important things we should do: "documentation for error handling"
+  * `// make a comment about error handling for each rpc`
+
+```proto
+...
+service CalculatorService {
+  ... // previous RPC definitions
+
+  // error handling
+  // this RPC will throw an exception if the sent number is negative
+  // the error being sent is of type `INVALID_ARGUMENT`
+  rpc SquareRoot(SquareRootRequest) returns (SquareRootResponse){};
+}
+```
+
+#### 44.2.2. Server
+
+now, we can go to the `calculator_server/server.go` and have to implement `SquareRoot`
+
+```go
+...
+
+func (*server) SquareRoot(ctx context.Context, req *calculatorpb.SquareRootRequest) (*calculatorpb.SquareRootResponse, error) {
+  fmt.Println("Received SquareRoot RPC")
+  number := req.GetNumber()
+  if number < 0 {
+    return nil, status.Errorf(
+      codes.InvalidArgument,
+      fmt.Sprintf("Received a negative number: %v", number),
+    )
+  }
+  return &calculatorpb.SquareRootResponse{
+    NumberRoot: math.Sqrt(float64(number)),
+  }, nil
+}
+
+...
+```
+
+#### 44.2.3. Client
+
+The server is now supporting the `SquareRoot`, we need to update the client, `calculator_client/client.go`
+
+```go
+...
+
+func main() {
+  fmt.Println("Calculator Client")
+  cc, err := grpc.Dial("localhost:50051", grpc.WithInsecure())
+  if err != nil {
+    log.Fatalf("could not connect: %v", err)
+  }
+  defer cc.Close()
+
+  c := calculatorpb.NewCalculatorServiceClient(cc)
+
+  ...
+
+  doErrUnary(c)
+}
+
+...
+
+func doErrUnary(c calculatorpb.CalculatorServiceClient) {
+  fmt.Println("Starting to do a SquareRoot Unary RPC...")
+
+  // correct call
+  doErrorCall(c, 10)
+
+  // error call
+  doErrorCall(c, -2)
+}
+
+func doErrorCall(c calculatorpb.CalculatorServiceClient, n int32) {
+  resp, err := c.SquareRoot(context.Background(), &calculatorpb.SquareRootRequest{Number: n})
+  if err != nil {
+    // err converted into the respErr
+    // which is gRPC-friendly error that has message and code
+    // but only if this `err` is actual gRPC error
+    // if NOT, you'll get `ok` being false,
+    // you can throw the normal error (the else clause)
+    respErr, ok := status.FromError(err)
+    if ok {
+      // actual error from gRPC (user error)
+      fmt.Printf("Error message from server: %v\n", respErr.Message())
+      fmt.Println(respErr.Code())
+      if respErr.Code() == codes.InvalidArgument {
+        fmt.Println("We probably sent a negative number!")
+        return
+      }
+    } else {
+      // bigger error, framework type of error
+      log.Fatalf("Big Error calling SquareRoot: %v", err)
+      return
+    }
+  }
+  fmt.Printf("Result of square root of %v: %v\n", n, resp.GetNumberRoot())
+}
+
+...
+```
+
+* for the `codes.*` of `codes. we can also use another errors:
+  * `codes.NotFound`
+  * `codes.OutOfRange`
+  * `codes.PermissionDenied`
+  * and more ...
+
+#### 44.2.4. Run Server and Client
+
+Now, the server and client are written. Let's run the server:
+
+```bash
+go run calculator/calculator_server/server.go
+```
+
+and you will see this message:
+
+```bash
+Calculator Server
+```
+
+then, let's run the client:
+
+```bash
+go run calculator/calculator_client/client.go
+```
+
+by running the client, the client can send requests to the server so the server-side get this messages:
+
+```bash
+Received SquareRoot RPC
+Received SquareRoot RPC
+```
+
+because client send request 2 times: one is valid request, the other is invalid request
+
+and the client-side get the responses:
+
+```bash
+Calculator Client
+Starting to do a SquareRoot Unary RPC...
+Result of square root of 10: 3.1622776601683795
+Error message from server: Received a negative number: -2
+InvalidArgument
+We probably sent a negative number!
 ```
 
 ---
