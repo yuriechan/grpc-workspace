@@ -245,3 +245,21 @@ We probably sent a negative number!
 ```
 
 ---
+
+## 45. [Theory] Deadlines
+
+### 45.1. gRPC Deadlines
+
+* Deadlines allow gRPC clients to specify how long they are willing to wait for an RPC to complete before the RPC is terminated with the error `DEADLINE_EXCEEDED`
+* **The gRPC documentation recommends you set a deadline for ALL client RPC calls**
+* Setting the deadline is up to you: how long do you feel your API should have to complete?
+  * usually small APIs: 100 ms, 500 ms, or 1000 ms (if slower response is okay)
+  * for long API call: 5 min?
+  * but, it's up to you
+* The server should check if the deadline has exceeded and cancel the work it is doing
+* This blog describes deadline in depth: `https://grpc.io/blog/deadlines`
+* **NOTE**: Deadlines are propagated across if gRPC alls are chained
+  * A => B => C (deadline for A is passed to B and then passed to C)
+  * thus, C would be "aware" of the deadline of the client A
+
+---
