@@ -263,3 +263,132 @@ We probably sent a negative number!
   * thus, C would be "aware" of the deadline of the client A
 
 ---
+
+## 46. [Hands-On] Deadlines
+
+### 46.1. gRPC Deadlines: Hands On
+
+* We'll implement the server to return the response after 3000 ms
+* The server will check if the client has cancelled the request
+* We'll implement the client to set a deadline of 5000 ms
+* We'll implement the client to set a deadline of 1000 ms
+
+### 46.2. the Implementation
+
+#### 46.2.1. Protobuf
+
+one more API implementation under `greet.proto`:
+
+```proto
+...
+
+message GreetWithDeadlineRequest {
+  Greeting greeting = 1;
+}
+
+message GreetWithDeadlineResponse {
+  string result = 1;
+}
+
+service GreetService {
+  ...
+
+  // Unary With Deadline
+  rpc GreetWithDeadline(GreetWithDeadlineRequest) returns (GreetWithDeadlineResponse) {};
+}
+```
+
+generate the code:
+
+```bash
+protoc greet/greetpb/greet.proto --go_out=plugins=grpc:.
+```
+
+#### 46.2.2. Client
+
+let's go to `greet/greet_client/client.go` and add implementation:
+
+* add `doUnaryWithDeadline()` at the `main` func
+
+```go
+func main() {
+  fmt.Println("Hello, I am a client.")
+
+  cc, err := grpc.Dial("localhost:50051", grpc.WithInsecure()) // WithInsecure() for just now testing
+  if err != nil {
+  log.Fatalf("Could not connect: %v", err)
+  }
+
+  defer cc.Close()
+
+  c := greetpb.NewGreetServiceClient(cc)
+
+  doUnaryWithDeadline(c, 5*time.Second) // should complete
+  doUnaryWithDeadline(c, 1*time.Second) // should timeout
+}
+```
+
+#### 46.2.3. Server
+
+```go
+...
+
+func (*server) GreetWithDeadline(ctx context.Context, req *greetpb.GreetWithDeadlineRequest) (*greetpb.GreetWithDeadlineResponse, error) {
+  fmt.Printf("GreetWithDeadline function was invoked with %v\n", req)
+  for i := 0; i < 3; i++ {
+    if ctx.Err() == context.Canceled {
+      // the client canceled the request
+      fmt.Println("The client canceled the request!")
+      return nil, status.Error(codes.Canceled, "the client canceled the request!")
+    }
+    time.Sleep(1 * time.Second)
+  }
+  firstName := req.GetGreeting().GetFirstName()
+  result := "Hello " + firstName
+  res := &greetpb.GreetWithDeadlineResponse{
+    Result: result,
+  }
+  return res, nil
+}
+
+...
+```
+
+#### 46.2.4. Run the Codes
+
+run the server:
+
+```bash
+go run greet/greet_server/server.go
+```
+
+and your _server terminal_ shows:
+
+```bash
+Hello world!
+```
+
+and open another terminal and run the client:
+
+```bash
+go run greet/greet_client/client.go
+```
+
+your _server terminal_ outputs:
+
+```bash
+GreetWithDeadline function was invoked with greeting:<first_name:"Mark" last_name:"Hahn" >
+GreetWithDeadline function was invoked with greeting:<first_name:"Mark" last_name:"Hahn" >
+```
+
+and your _client terminal_ returns:
+
+```bash
+Hello, I am a client.
+Starting to do a UnaryWithDeadline RPC...
+2020/03/19 02:15:19 Response from GreetWithDeadline: Hello Mark
+Starting to do a UnaryWithDeadline RPC...
+Timeout was hit! Deadline was exceeded
+```
+
+---
