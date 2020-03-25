@@ -392,3 +392,124 @@ Timeout was hit! Deadline was exceeded
 ```
 
 ---
+
+## 47. [Theory] SSS Security
+
+* Transport Layer Security (TLS), and its now-deprecated predecessor, Secure Sockets Layer (SSL), are cryptographic protocols designed to provide communications security over a computer network.
+  * details: [wikipedia](https://en.wikipedia.org/wiki/Transport_Layer_Security)
+
+* SSL Encryption in gRPC
+  * In production gRPC call should be running with encryption enabled
+  * This is done by generating SSL certificates
+  * SSL allows communication to be secure end-to-end and ensuring no man in the middle attack can be performed
+
+How SSL works?
+
+* The need for SSL Encryption (1/3)
+  * when you communicate over the internet,
+    * your data is visible by all servers that transfer your packet
+  * any router in the middle can view the packets you're sending using **PLAIN TEXT**
+  * **It is not secure enough when the data is sensitive
+
+```note
+       -----                              ----------------                          ---------
+HTTP  | You | -------------------------- | U: admin       | ---------------------- | Website |
+      |     |                            | P: supersecret |                        |         |
+       -----                              ----------------                          ---------
+
+       -----       ----------------       ------------       ----------------       ---------
+HTTP  | You | --- | U: admin       | --- |   Router   | --- | U: admin       | --- | Website |
+      |     |     | P: supersecret |     | (Internet) |     | P: supersecret |     |         |
+       -----       ----------------       ------------       ----------------       ---------
+```
+
+* The need for SSL Encryption (2/3)
+  * SSL allows clients and servers to encrypt packet
+
+```note
+       -------------                      ----------------                          ---------
+SSL   | gRPC Client | ------------------ | eBCskdsjEQdkfj | ---------------------- | Website |
+      |             |                    | VfEGezKehbB... |                        |         |
+       -------------                      ----------------                          ---------
+
+       ----------------                                                      ----------------  
+      | U: admin       |                                                    | eBCskdsjEQdkfj |
+      | P: supersecret | --- SSL Encryption --        -- SSL Decryption --- | VfEGezKehbB... |
+       ----------------                      |        |                      ----------------
+                                             |        |
+       ----------------                      |        |                      ----------------
+      | eBCskdsjEQdkfj | <--------------------        --------------------> | U: admin       |
+      | VfEGezKehbB... |                                                    | P: supersecret |
+       ----------------                                                      ----------------
+
+```
+
+* The need for SSL Encryption (2/3)
+  * SSL enables clients and servers to securely exchanges data
+  * Routers cannot view the content of the Internet packets
+  * let's do a deep dive into how SSL works
+
+```note
+       --------       ----------------       ------------       ----------------       ---------
+SSL   | gRPC   | --- | eBCskdsjEQdkfj | --- |   Router   | --- | eBCskdsjEQdkfj | --- | Website |
+      | Client |     | VfEGezKehbB... |     | (Internet) |     | VfEGezKehbB... |     |         |
+       --------      ----------------        ------------       ----------------       ---------
+```
+
+* What is SSL?
+  * TLS (Transport Layer Security), successor of SSL, encrypts the connection between 2 endpoints for secure data exchange
+
+    ```note
+     ----------                                                                              ------------------------
+    | computer | -----> SSL Protocol (https)/Secure and secret exchange of information ---> | https://www.google.com |
+     ----------                                                                              ------------------------
+    ```
+
+  * based on SSL certificates (e.g. on the web browser, you may see: `Secure | https://www.google.com`)
+  * two ways of using SSL (gRPC can use both):
+    * 1-way verification, e.g. browser => WebServer (**ENCRYPTION**)
+    * 2-way verification, e.g. SSL authentication (**AUTHENTICATION**)
+
+* Detailed Setup of SSL for Encryption
+
+```note
+                                                                                                               -------------
+                                                                                                              | Server PEM  |
+                                                                                                              | Private Key |
+                                                                                                               -------------
+               ---
+              |     -------------                          -------------    Send Signed Certificate             ------------
+Certification |    |   CA Root   |   Trust Certificate    | Certificate | -----------------------------------> | Server CRT |
+    Setup     |    |   Public    | ---------------------> |  Authority  |                                      | Signed by  |
+              |    | Certificate |                        |    (CA)     | <----------------------------------- | CA         |
+              |     -------------                          -------------       Request to sign server.crt       ------------
+               ---        |                                                  certificate for myapi.example.com        |
+                          |                                                                                           |
+                          |                                                                                           |
+               ---        V                                                                                           V
+              |       --------  <-------- 1. Send signed SSL certificate --------------------------------  -------------------
+   SSL        |      |  gRPC  | ------*                                                                   |   gRPC Server     |
+Handshake     |      | Client | <----/    2. Verify SSL certificate from Server                           |                   |
+              |      |        |                                                                           | myapi.example.com |
+              |       --------  <======== 3. Secure SSL Encrypted Communication ========================>  -------------------
+               ---
+```
+
+* i. Certificate Authority (CA): can be public if you want to assign a public URL (e.g. myapi.example.com); or you can have a private CA (e.g. internal URLs), in which case, you have to create or maintain that CA.
+* ii. server can create a private key (server PEM Private Key)
+  * by using the private key, it will generate a certificate request
+  * basically, it'll ask CA for signing the certificate request
+  * thus, CA gives signed certificate (`server.crt` is a certificate that's signed by CA)
+    * server-side, we need to have
+      * a private key
+      * signed certificate
+* iii. client-side needs "trust certificate" from the CA
+  * CA usually issues "CA Root Public Certificate"
+* iv. now, it's ready to do SSL Handshake
+  * send signed SSL certificate
+  * verify SSL certificate from server
+  * secure SSL encrypted communication
+
+> Wow, it's a LOT...
+
+---
