@@ -393,7 +393,7 @@ Timeout was hit! Deadline was exceeded
 
 ---
 
-## 47. [Theory] SSS Security
+## 47. [Theory] SSL Security
 
 * Transport Layer Security (TLS), and its now-deprecated predecessor, Secure Sockets Layer (SSL), are cryptographic protocols designed to provide communications security over a computer network.
   * details: [wikipedia](https://en.wikipedia.org/wiki/Transport_Layer_Security)
