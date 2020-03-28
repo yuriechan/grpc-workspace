@@ -78,4 +78,4 @@ In just a few hours, you will know everything you need to know to create simple 
 ## Who this course is for
 
 * Developers who want to understand how to write .proto files and write code to create Protocol Buffer data
-* Architects who want to understand how Protocol Buffers works and be useful for their solution archicture
+* Architects who want to understand how Protocol Buffers works and be useful for their solution architecture
