@@ -512,4 +512,691 @@ Handshake     |      | Client | <----/    2. Verify SSL certificate from Server 
 
 > Wow, it's a LOT...
 
+but gRPC makes things simpler.
+
 ---
+
+## 48. [Hands-On] SSL Encryption in gRPC [Golang]
+
+* We'll setup
+  * a certificate autority (CA)
+  * a server certificate
+* We'll sign
+  * a server certificate
+
+then,
+
+* We'll setup
+  * the Server to use TLS
+  * the Client to connect securely over TLS
+
+* links:
+  * https://github.com/grpc/grpc-go/blob/master/Documentation/grpc-auth-support.md
+  + https://grpc.io/docs/guides/auth.html
+
+### 48.1. Looking at the gRPC Official Documentation
+
+Go code:
+
+* **base case - no encryption or authentication**
+  * client:
+
+    ```go
+    conn, _ := grpc.Dial("localhost:50051", grpc.WithInsecure())
+    // error handling omitted
+    client := pb.NewGreeterClient(conn)
+    // ...
+    ```
+
+  * server:
+
+    ```go
+    s := grpc.NewServer()
+    lis, _ := net.Listen("tcp", "localhost:50051")
+    // error handling omitted
+    s.Serve(lis)
+    ```
+
+* **with server authentication SSL/TLS**
+  * client:
+
+    ```go
+    creds := credentials.NewClientTLSFromFile(certFile, "")
+    conn, _ := grpc.Dial("localhost:50051", grpcWithTransportCredentials(creds))
+    // error handling omitted
+    client := pb.NewGreeterClient(conn)
+    // ...
+    ```
+  
+  * server:
+  
+    ```go
+    creds := credentials.NewServerTLSFromFile(certFile, keyFile)
+    s := grpc.NewServer(grpc.Creds(creds))
+    lis, _ := net.Listen("tcp", "localhost:50051")
+    // error handling omitted
+    s.Serve(lis)
+    ```
+
+### 48.2. SSL Encryption Keys Generation
+
+* let's add `ssl` directory at the same level as `calculator` and `greet` directories
+
+```note
+calculator/
+  calculator_client/...
+  calculator_server/...
+  calculatorpb/...
+
+greet/
+  greet_client/...
+  greet_server/...
+  greetpb/...
+
+ssl/
+  instructions.sh
+
+generation.sh
+```
+
+and in the `instructions.sh` we have this code:
+
+```sh
+#!/bin/bash
+# Inspired from: https://github.com/grpc/grpc-java/tree/master/examples#generating-self-signed-certificates-for-use-with-grpc
+
+# Output files
+# ca.key: Certificate Authority private key file (this shouldn't be shared in real-life)
+# ca.crt: Certificate Authority trust certificate (this should be shared with users in real-life)
+# server.key: Server private key, password protected (this shouldn't be shared)
+# server.csr: Server certificate signing request (this should be shared with the CA owner)
+# server.crt: Server certificate signed by the CA (this would be sent back by the CA owner) - keep on server
+# server.pem: Conversion of server.key into a format gRPC likes (this shouldn't be shared)
+
+# Summary
+# Private files: ca.key, server.key, server.pem, server.crt
+# "Share" files: ca.crt (needed by the client), server.csr (needed by the CA)
+
+# Changes these CN's to match your hosts in your environment if needed.
+SERVER_CN=localhost
+
+# Step 1: Generate Certificate Authority + Trust Certificate (ca.crt)
+openssl genrsa -passout pass:1111 -des3 -out ca.key 4096
+openssl req -passin pass:1111 -new -x509 -days 3650 -key ca.key -out ca.crt -subj "/CN=${SERVER_CN}"
+
+# Step 2: Generate the Server Private Key (server.key)
+openssl genrsa -passout pass:1111 -des3 -out server.key 4096
+
+# Step 3: Get a certificate signing request from the CA (server.csr)
+openssl req -passin pass:1111 -new -key server.key -out server.csr -subj "/CN=${SERVER_CN}"
+
+# Step 4: Sign the certificate with the CA we created (it's called self signing) - server.crt
+openssl x509 -req -passin pass:1111 -days 3650 -in server.csr -CA ca.crt -CAkey ca.key -set_serial 01 -out server.crt 
+
+# Step 5: Convert the server certificate to .pem format (server.pem) - usable by gRPC
+openssl pkcs8 -topk8 -nocrypt -passin pass:1111 -in server.key -out server.pem
+```
+
+* `SERVER_CN` is not set as `localhost
+  * but, if you are running it with the real API address you can change that
+  * e.g. `SERVER_CN=myapi.example.com`
+
+open your terminal and do this one by one:
+
+```bash
+SERVER_CN=localhost
+```
+
+check it is set well:
+
+```bash
+$ echo $SERVER_CN
+localhost
+```
+
+go into directory `ssl`:
+
+```bash
+cd ssl
+$ pwd
+/.../ssl
+```
+
+* Step 1: Generate Certificate Authority + Trust Certificate (ca.crt)
+  * create CA by using this command, output would be `ca.key`:
+  * also get `ca.crt`
+
+  ```bash
+  $ openssl genrsa -passout pass:1111 -des3 -out ca.key 4096
+  Generating RSA private key, 4096 bit long modulus
+  ....................................................................................................................................................++
+  ..................................................................................................................++
+  e is 65537 (0x10001)
+  ```
+
+  then you get `ca.key` as well:
+
+  ```bash
+  $ ls
+  ca.key
+  instructions.sh
+  ```
+
+  now let's run this command (currently `SERVER_CN` is `localhost`):
+
+  ```bash
+  $ openssl req -passin pass:1111 -new -x509 -days 3650 -key ca.key -out ca.crt -subj "/CN=${SERVER_CN}"
+  $ ls
+  ca.crt
+  ca.key
+  instructions.sh
+  ```
+
+* Step 2: Generate the Server Private Key (`server.key`)
+
+  ```bash
+  $ openssl genrsa -passout pass:1111 -des3 -out server.key 4096
+  Generating RSA private key, 4096 bit long modulus
+  ...++
+  ....................................................................................................................................................................................++
+  e is 65537 (0x10001)
+
+  $ ls
+  ca.crt
+  ca.key
+  instructions.sh
+  server.key
+  ```
+
+* Step 3: Get a certificate signing request from the CA (`server.csr`)
+
+  ```bash
+  $ openssl req -passin pass:1111 -new -key server.key -out server.csr -subj "/CN=${SERVER_CN}"
+
+  $ ls
+  ca.crt
+  ca.key
+  instructions.sh
+  server.csr
+  server.key
+  ```
+
+* Step 4: Sign the certificate with the CA we created (it's called self signing) - `server.crt`
+
+  ```bash
+  $ openssl x509 -req -passin pass:1111 -days 3650 -in server.csr -CA ca.crt -CAkey ca.key -set_serial 01 -out server.crt
+  Signature ok
+  subject=/CN=localhost
+  Getting CA Private Key
+
+  $ ls
+  ca.crt
+  ca.key
+  instructions.sh
+  server.crt
+  server.csr
+  server.key
+  ```
+
+* Step 5: Convert the server certificate to .pem format (`server.pem`) - usable by gRPC
+
+  ```bash
+  $ openssl pkcs8 -topk8 -nocrypt -passin pass:1111 -in server.key -out server.pem
+
+  $ ls
+  ca.crt
+  ca.key
+  instructions.sh
+  server.crt
+  server.csr
+  server.key
+  server.pem
+  ```
+
+### 48.3. Use the Keys to `greet` example
+
+let's go to `greet` project's `greet/greet_server/server.go`.  
+
+What we have to do is, like we saw from the [gRPC documentation](https://grpc.io/docs/guides/auth.html#go), we may want to consider this:
+
+* With server authentication SSL/TLS
+  * Client:
+
+    ```go
+    creds, _ := credentials.NewClientTLSFromFile(certFile, "")
+    conn, _ := grpc.Dial("localhost:50051", grpc.WithTransportCredentials(creds))
+    // error handling omitted
+    client := pb.NewGreeterClient(conn)
+    // ...
+    ```
+
+  * Server:
+
+    ```go
+    creds, _ := credentials.NewServerTLSFromFile(certFile, keyFile)
+    s := grpc.NewServer(grpc.Creds(creds))
+    lis, _ := net.Listen("tcp", "localhost:50051")
+    // error handling omitted
+    s.Serve(lis)
+    ```
+
+#### 48.3.1 Server
+
+We need to create a credential, `NewServerTLSFromFile(certFile, keyFile)` and specify two files (`certFile`, `keyFile`). Thus, let's go back to `greet/greet_server/server.go`
+
+```go
+func main() {
+  fmt.Println("Hello world!")
+
+  lis, err := net.Listen("tcp", "0.0.0.0:50051") // 50051 is a default port for gRPC
+  if err != nil {
+    log.Fatalf("Failed to listen: %v", err)
+  }
+
+  certFile, keyFile := "ssl/server.crt", "ssl/server.pem"
+  creds, sslErr := credentials.NewServerTLSFromFile(certFile, keyFile)
+  if sslErr != nil {
+    log.Fatalf("Failed loading certificates: %v", sslErr)
+  }
+  opts := grpc.Creds(creds)
+
+  s := grpc.NewServer(opts)
+  greetpb.RegisterGreetServiceServer(s, &server{})
+
+  if err := s.Serve(lis); err != nil {
+    log.Fatalf("Failed to serve: %v", err)
+  }
+}
+```
+
+so, we defined the `certFile` and `keyFile`, then get `creds` by using two files via `credentials.NewServerTLSFromFile()`. Set the `opts` by using `creds` via `grpc.Creds()` and put it into `grpc.NewServer()`.
+
+Now, we can run the server to make sure it's SSL enabled:
+
+```bash
+$ go run greet/greet_server/server.go 
+Hello world!
+```
+
+It's running so it seems okay now and let's try to run client and modify the client.
+
+#### 48.3.2 Client
+
+Now, we can add SSL to client code (`greet/greet_client/client.go`). This time, let's use `doUnary(c)`
+
+```go
+func main() {
+  fmt.Println("Hello, I am a client.")
+
+  cc, err := grpc.Dial("localhost:50051", grpc.WithInsecure()) // WithInsecure() for just now testing
+  if err != nil {
+    log.Fatalf("Could not connect: %v", err)
+  }
+
+  defer cc.Close()
+
+  c := greetpb.NewGreetServiceClient(cc)
+  // fmt.Printf("Created client: %f", c)
+
+  doUnary(c)
+  // doServerStreaming(c)
+  // doClientStreaming(c)
+  // doBiDiStreaming(c)
+
+  // doUnaryWithDeadline(c, 5*time.Second) // should complete
+  // doUnaryWithDeadline(c, 1*time.Second) // should timeout
+}
+
+func doUnary(c greetpb.GreetServiceClient) {
+  fmt.Println("Starting to do a Unary RPC...")
+  req := &greetpb.GreetRequest{
+    Greeting: &greetpb.Greeting{
+      FirstName: "Mark",
+      LastName:  "Hahn",
+    },
+  }
+  res, err := c.Greet(context.Background(), req)
+  if err != nil {
+    log.Fatalf("error while calling Greet RPC: %v", err)
+  }
+  log.Printf("Response from Greet: %v", res.Result)
+}
+```
+
+pay attention of this part:
+
+```go
+cc, err := grpc.Dial("localhost:50051", grpc.WithInsecure()) // WithInsecure() for just now testing
+```
+
+as we are using `grpc.WithInsecure()`, we can try to run this client.
+Since the server is running, we can run the client right now in another terminal:
+
+```bash
+$ go run greet/greet_client/client.go
+Hello, I am a client.
+Starting to do a Unary RPC...
+2020/03/27 18:53:53 error while calling Greet RPC: rpc error: code = Unavailable desc = connection closed
+exit status 1
+```
+
+and you can see the server's screen (nothing changed, just showing the same screen as sam as when we ran the code at the previous section):
+
+```bash
+$ go run greet/greet_server/server.go
+Hello world!
+```
+
+So, client-side got error message and the server side has no additional message.
+
+**Thus, we DO need to change our client-side code:**
+
+* remember the sample code that gRPC docs shows
+
+```go
+creds := credentials.NewClient(certiFile, "")
+conn, _ := grpc.Dial("localhost:50051", grpc.WithTransportCredentials(creds))
+// error handling omitted
+client := pb.NewGreeterClient(conn)
+//...
+```
+
+let's revisit the code:
+
+```go
+func main() {
+  fmt.Println("Hello, I am a client.")
+
+  certFile := "ssl/ca.crt" // Certificate Authority Trust certificate
+  creds, sslErr := credentials.NewClientTLSFromFile(certFile, "") // the 2nd argument is override of the server name
+  if sslErr != nil {
+    log.Fatalf("Error whilst loading CA trust certificate: %v", sslErr)
+  }
+  opts := grpc.WithTransportCredentials(creds)
+  // cc, err := grpc.Dial("localhost:50051", grpc.WithInsecure()) // WithInsecure() for just now testing
+  cc, err := grpc.Dial("localhost:50051", opts)
+  if err != nil {
+    log.Fatalf("Could not connect: %v", err)
+  }
+
+  defer cc.Close()
+
+  c := greetpb.NewGreetServiceClient(cc)
+  // fmt.Printf("Created client: %f", c)
+
+  doUnary(c)
+  // doServerStreaming(c)
+  // doClientStreaming(c)
+  // doBiDiStreaming(c)
+
+  // doUnaryWithDeadline(c, 5*time.Second) // should complete
+  // doUnaryWithDeadline(c, 1*time.Second) // should timeout
+}
+
+func doUnary(c greetpb.GreetServiceClient) {
+  fmt.Println("Starting to do a Unary RPC...")
+  req := &greetpb.GreetRequest{
+    Greeting: &greetpb.Greeting{
+      FirstName: "Mark",
+      LastName:  "Hahn",
+    },
+  }
+  res, err := c.Greet(context.Background(), req)
+  if err != nil {
+    log.Fatalf("error while calling Greet RPC: %v", err)
+  }
+  log.Printf("Response from Greet: %v", res.Result)
+}
+```
+
+now, we can run the client again:
+
+```bash
+$ go run greet/greet_client/client.go 
+Hello, I am a client.
+Starting to do a Unary RPC...
+2020/03/27 22:29:23 Response from Greet: Hello Mark
+```
+
+and see the result printed out, and the server-side also get this message:
+
+```bash
+Greet function was invoked with greeting:<first_name:"Mark" last_name:"Hahn" >
+```
+
+---
+
+#### 48.3.3. Small Refactoring
+
+* **server-side**
+
+  ```go
+  func main() {
+    fmt.Println("Hello world!")
+
+    lis, err := net.Listen("tcp", "0.0.0.0:50051") // 50051 is a default port for gRPC
+    if err != nil {
+      log.Fatalf("Failed to listen: %v", err)
+    }
+
+    var opts grpc.ServerOption
+
+    tls := false  // or `tls := true`
+    if tls {
+      certFile, keyFile := "ssl/server.crt", "ssl/server.pem"
+      creds, sslErr := credentials.NewServerTLSFromFile(certFile, keyFile)
+      if sslErr != nil {
+        log.Fatalf("Failed loading certificates: %v", sslErr)
+      }
+      opts := grpc.Creds(creds)
+    }
+
+    s := grpc.NewServer(opts)
+    greetpb.RegisterGreetServiceServer(s, &server{})
+
+    if err := s.Serve(lis); err != nil {
+      log.Fatalf("Failed to serve: %v", err)
+    }
+  }
+  ```
+
+  run the server:
+
+  ```bash
+  $ go run greet/greet_server/server.go 
+  Hello world!
+  panic: runtime error: invalid memory address or nil pointer dereference
+  [signal SIGSEGV: segmentation violation code=0x1 addr=0x18 pc=0x13f5d42]
+
+  goroutine 1 [running]:
+  google.golang.org/grpc.NewServer(0xc0000fff30, 0x1, 0x1, 0xd)
+  ...
+  ```
+
+  but with this code, we get `nil pointer reference error, so we need to change
+
+  ```go
+  var opt grpc.ServerOption
+  // ...
+  if tls {
+    // ...
+    opts = grpc.Creds(creds))
+  }
+
+  s := grpc.NewServer(opts)
+  // ...
+  ```
+
+  to
+
+  ```go
+  opts := []grpc.ServerOption
+  // ...
+  if tls {
+    // ...
+    opts = append(opts, grpc.Creds(creds))
+  }
+
+  s := grpc.NewServer(opts...)
+  // ...
+  ```
+
+  so it should look like this:
+
+  ```go
+  func main() {
+    fmt.Println("Hello world!")
+
+    lis, err := net.Listen("tcp", "0.0.0.0:50051") // 50051 is a default port for gRPC
+    if err != nil {
+      log.Fatalf("Failed to listen: %v", err)
+    }
+
+    opts := []grpc.ServerOption{}
+    tls := false
+    if tls {
+      certFile, keyFile := "ssl/server.crt", "ssl/server.pem"
+      creds, sslErr := credentials.NewServerTLSFromFile(certFile, keyFile)
+      if sslErr != nil {
+        log.Fatalf("Failed loading certificates: %v", sslErr)
+      }
+      opts = append(opts, grpc.Creds(creds))
+    }
+
+    s := grpc.NewServer(opts...)
+    greetpb.RegisterGreetServiceServer(s, &server{})
+
+    if err := s.Serve(lis); err != nil {
+      log.Fatalf("Failed to serve: %v", err)
+    }
+  }
+  ```
+
+  and run the server again:
+
+  ```bash
+  $ go run greet/greet_server/server.go
+  Hello world!
+  ```
+
+  now the server is running well, let's fix the client.
+
+* **client-side**
+
+```go
+func main() {
+  fmt.Println("Hello, I am a client.")
+
+  tls := false  // or `tls := true`
+  opts := grpc.WithInsecure()
+  if tsl {
+    certFile := "ssl/ca.crt" // Certificate Authority Trust certificate
+    creds, sslErr := credentials.NewClientTLSFromFile(certFile, "") // the 2nd argument is override of the server name
+    if sslErr != nil {
+      log.Fatalf("Error whilst loading CA trust certificate: %v", sslErr)
+    }
+    opts := grpc.WithTransportCredentials(creds)
+  }
+
+  cc, err := grpc.Dial("localhost:50051", opts)
+  if err != nil {
+    log.Fatalf("Could not connect: %v", err)
+  }
+
+  defer cc.Close()
+
+  c := greetpb.NewGreetServiceClient(cc)
+  // fmt.Printf("Created client: %f", c)
+
+  doUnary(c)
+  // doServerStreaming(c)
+  // doClientStreaming(c)
+  // doBiDiStreaming(c)
+
+  // doUnaryWithDeadline(c, 5*time.Second) // should complete
+  // doUnaryWithDeadline(c, 1*time.Second) // should timeout
+}
+
+func doUnary(c greetpb.GreetServiceClient) {
+  fmt.Println("Starting to do a Unary RPC...")
+  req := &greetpb.GreetRequest{
+    Greeting: &greetpb.Greeting{
+      FirstName: "Mark",
+      LastName:  "Hahn",
+    },
+  }
+  res, err := c.Greet(context.Background(), req)
+  if err != nil {
+    log.Fatalf("error while calling Greet RPC: %v", err)
+  }
+  log.Printf("Response from Greet: %v", res.Result)
+}
+```
+
+client can be run:
+
+```bash
+$ go run greet/greet_client/client.go
+Hello, I am a client.
+Starting to do a Unary RPC...
+2020/03/29 00:29:58 Response from Greet: Hello Mark
+```
+
+**Also, we can enable the TLS mode** to client and server side
+
+```go
+tls := true
+```
+
+and run the server:
+
+```bash
+$ go run greet/greet_server/server.go 
+Hello world!
+```
+
+here is the client code:
+
+```go
+func main() {
+  fmt.Println("Hello world!")
+
+  lis, err := net.Listen("tcp", "0.0.0.0:50051") // 50051 is a default port for gRPC
+  if err != nil {
+    log.Fatalf("Failed to listen: %v", err)
+  }
+
+  opts := []grpc.ServerOption{}
+  tls := true
+  if tls {
+    certFile, keyFile := "ssl/server.crt", "ssl/server.pem"
+    creds, sslErr := credentials.NewServerTLSFromFile(certFile, keyFile)
+    if sslErr != nil {
+      log.Fatalf("Failed loading certificates: %v", sslErr)
+    }
+    opts = append(opts, grpc.Creds(creds))
+  }
+
+  s := grpc.NewServer(opts...)
+  greetpb.RegisterGreetServiceServer(s, &server{})
+
+  if err := s.Serve(lis); err != nil {
+    log.Fatalf("Failed to serve: %v", err)
+  }
+}
+```
+
+and run the client again:
+
+```bash
+$ go run greet/greet_client/client.go 
+Hello, I am a client.
+Starting to do a Unary RPC...
+2020/03/29 02:28:34 Response from Greet: Hello Mark
+```
+
+then the server get this message:
+
+```bash
+Greet function was invoked with greeting:<first_name:"Mark" last_name:"Hahn" > 
+```
