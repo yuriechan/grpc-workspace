@@ -1200,3 +1200,34 @@ then the server get this message:
 ```bash
 Greet function was invoked with greeting:<first_name:"Mark" last_name:"Hahn" > 
 ```
+
+---
+
+## 49. [Demo] Language Interoperability
+
+* gPRC can be used by any language
+  * because the code can be generated for any language,
+  * it makes it super simple to create micro-services in any language that interact with each other
+
+```note
+                                            -----------------                    ----------
+                                           | Purchase  ------|  proto req/res   | Shipment |
+   --------------------    proto req/res   | Service  | stub | ---------------> | Service  |
+  |                    | /---------------> | (Go)      ------|                  | (C#)     |
+  |              ------|/                   -----------------                    ----------
+  | Mobile App  | stub |
+  | (Java)       ------|\                   ----------
+  |                    | \---------------> | Pricing  |
+   --------------------|   proto req/res   | Service  |
+                                           | (Python) |
+                                            ----------
+```
+
+* Therefore we can do this:
+  * have a protobuf file
+    * create proto to go file
+    * create proto to java file
+  * write go server and run it
+  * write java client and run it
+  * vice versa
+  * or with other languages
