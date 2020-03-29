@@ -141,9 +141,35 @@ Thus, we can successfully run the MongoDB.
 
 ## 52. Instal MongoDB - Windows Instruction
 
+* Install MongoDB on Windows
+  * If you're having issues, please look at these tutorials:
+    * https://docs.mongodb.com/manual/tutorial/install-mongodb-on-windows/
+    * https://treehouse.github.io/installation-guides/windows/mongo-windows.html
+  * If you want to use a custom data directory
+    * Create C:/database_mongo
+    * mongod --dbpath=C:/database_mongo/
+
 ---
 
 ## 53. Instal MongoDB UI - Robo 3T
+
+* robomongo renamed as Robo 3T
+  * download: [link](https://robomongo.org/download)
+
+* after the app installed:
+  * open the app
+  * create connection with this spec:
+    * Type: Direct Connection
+    * Name: localhost
+    * Address: localhost:27017
+  * click the "test" button at bottom left
+    * you will get this message:
+      * Connected to **localhost:27017**
+      * Access to databases is available
+  * save this setting
+  * and now you are ready to connect.
+
+![robo3t](./robo-3t.png)
 
 ---
 
