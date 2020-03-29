@@ -1231,3 +1231,297 @@ Greet function was invoked with greeting:<first_name:"Mark" last_name:"Hahn" >
   * write java client and run it
   * vice versa
   * or with other languages
+
+---
+
+## 50.gRPC Reflection & Evans CLI
+
+### 50.1. gRPC Reflection & CLI
+
+* As we've seen, for Clients to connect to our Server,
+  * they need to have a `.proto` file
+    * which defines the service
+* This is fine for production (you definitely want to know the API definition in advance)
+* For development, when you have a gRPC server you don't know, sometimes you wish you could ask the server:
+  * > "what APIs do you have?"
+* That's reflection!
+* We may want reflection for two reasons:
+  * Having servers "expose" which endpoints are available
+  * Allowing **command line interface (CLI)** to talk to our server without have a preliminary `.proto` file
+* Let's implement Reflection on our Server
+* We'll use the **evans** CLI to practice on the client side
+
+### 50.2. Reflection on gPRC package
+
+* visit [github.com/grpc/grpc-go](https://www.github.com/grpc/grpc-go)
+  * go to [reflection](https://github.com/grpc/grpc-go/tree/master/reflection)
+  * it shows:
+    * Package reflection implements server reflection service.
+    * The service implemented is defined in: https://github.com/grpc/grpc/blob/master/src/proto/grpc/reflection/v1alpha/reflection.proto.
+    * To register server reflection on a gRPC server:
+
+      ```go
+      import "google.golang.org/grpc/reflection"
+
+      s := grpc.NewServer()
+      pb.RegisterYourOwnServer(s, &server{})
+
+      // Register reflection service on gRPC server.
+      reflection.Register(s)
+
+      s.Serve(lis)
+      ```
+
+### 50.3. Reflection Hands-on with `calculator`
+
+* let's try this on: `calculator/calculator_server/server.go`
+  * what we have to do:
+    * import `google.golang.org/grpc/reflection`
+    * use `reflection.Register(s)` where `s := grpc.NewServer()`
+
+```go
+package main
+
+import (
+  // ...
+  "google.golang.org/grpc/reflection"
+  // ...
+)
+
+// ...
+
+func main() {
+  fmt.Println("Calculator Server")
+
+  lis, err := net.Listen("tcp", "0.0.0.0:50051")
+  if err != nil {
+    log.Fatalf("Failed to listen: %v", err)
+  }
+
+  s := grpc.NewServer()
+  calculatorpb.RegisterCalculatorServiceServer(s, &server{})
+
+  // Register reflection service on gRPC server.
+  reflection.Register(s)
+
+  if err := s.Serve(lis); err != nil {
+    log.Fatalf("Failed to server: %v", err)
+  }
+}
+```
+
+and run the server:
+
+```bash
+$ go run calculator/calculator_server/server.go
+Calculator Server
+```
+
+### 50.4. Evans CLI
+
+* Evans CLI: [github.com/ktr0731/evans](https://github.com/ktr0731/evans)
+* instal
+  * MacOS
+
+```bash
+$ brew tap ktr0731/evans
+$ brew install evans
+```
+
+try to run it:
+
+```bash
+$ evans
+evans 0.8.5
+
+Usage: evans [--help] [--version] [options ...] [PROTO [PROTO ...]]
+
+Positional arguments:
+        PROTO                          .proto files
+
+Options:
+        --silent, -s                     hide redundant output (default "false")
+        --package string                 default package
+        --service string                 default service
+        --path strings                   proto file paths (default "[]")
+        --host string                    gRPC server host
+        --port, -p string                gRPC server port (default "50051")
+        --header slice of strings        default headers that set to each requests (example: foo=bar) (default "[]")
+        --web                            use gRPC-Web protocol (default "false")
+        --reflection, -r                 use gRPC reflection (default "false")
+        --tls, -t                        use a secure TLS connection (default "false")
+        --cacert string                  the CA certificate file for verifying the server
+        --cert string                    the certificate file for mutual TLS auth. it must be provided with --certkey.
+        --certkey string                 the private key file for mutual TLS auth. it must be provided with --cert.
+        --servername string              override the server name used to verify the hostname (ignored if --tls is disabled)
+        --edit, -e                       edit the project config file by using $EDITOR (default "false")
+        --edit-global                    edit the global config file by using $EDITOR (default "false")
+        --verbose                        verbose output (default "false")
+        --version, -v                    display version and exit (default "false")
+        --help, -h                       display help text and exit (default "false")
+
+evans: invalid config condition: 1 error occurred:
+
+* one or more proto files, or gRPC reflection required
+```
+
+try this: `evans -p 50051 -r` (evans with port 50051 by using gRPC reflection)
+
+```bash
+$ evans -p 50051 -r
+
+  ______
+ |  ____|
+ | |__    __   __   __ _   _ __    ___
+ |  __|   \ \ / /  / _. | | '_ \  / __|
+ | |____   \ V /  | (_| | | | | | \__ \
+ |______|   \_/    \__,_| |_| |_| |___/
+
+ more expressive universal gRPC client
+
+
+calculator.CalculatorService@127.0.0.1:50051>
+```
+
+shwo package:
+
+```bash
+calculator.CalculatorService@127.0.0.1:50051> show package
++------------+
+|  PACKAGE   |
++------------+
+| calculator |
++------------+
+```
+
+show service:
+
+```bash
+calculator.CalculatorService@127.0.0.1:50051> show service
++-------------------+--------------------------+---------------------------------+----------------------------------+
+|      SERVICE      |           RPC            |          REQUEST TYPE           |          RESPONSE TYPE           |
++-------------------+--------------------------+---------------------------------+----------------------------------+
+| CalculatorService | Sum                      | SumRequest                      | SumResponse                      |
+| CalculatorService | PrimeNumberDecomposition | PrimeNumberDecompositionRequest | PrimeNumberDecompositionResponse |
+| CalculatorService | ComputeAverage           | ComputeAverageRequest           | ComputeAverageResponse           |
+| CalculatorService | FindMaximum              | FindMaximumRequest              | FindMaximumResponse              |
+| CalculatorService | SquareRoot               | SquareRootRequest               | SquareRootResponse               |
++-------------------+--------------------------+---------------------------------+----------------------------------+
+```
+
+show message:
+
+```bash
+calculator.CalculatorService@127.0.0.1:50051> show message
++----------------------------------+
+|             MESSAGE              |
++----------------------------------+
+| ComputeAverageRequest            |
+| ComputeAverageResponse           |
+| FindMaximumRequest               |
+| FindMaximumResponse              |
+| PrimeNumberDecompositionRequest  |
+| PrimeNumberDecompositionResponse |
+| SquareRootRequest                |
+| SquareRootResponse               |
+| SumRequest                       |
+| SumResponse                      |
++----------------------------------+
+```
+
+desc (description) for `SumRequest`:
+
+```bash
+calculator.CalculatorService@127.0.0.1:50051> desc SumRequest
++---------------+------------+----------+
+|     FIELD     |    TYPE    | REPEATED |
++---------------+------------+----------+
+| first_number  | TYPE_INT32 | false    |
+| second_number | TYPE_INT32 | false    |
++---------------+------------+----------+
+```
+
+call `Sum` RPC:
+
+```bash
+calculator.CalculatorService@127.0.0.1:50051> call Sum
+first_number (TYPE_INT32) => 12
+second_number (TYPE_INT32) => 32
+{
+  "sumResult": 44
+}
+```
+
+call `PrimeNumberDecomposition` RPC:
+
+```bash
+calculator.CalculatorService@127.0.0.1:50051> call PrimeNumberDecomposition
+number (TYPE_INT64) => 12321
+{
+  "primeFactor": "3"
+}
+{
+  "primeFactor": "3"
+}
+{
+  "primeFactor": "37"
+}
+{
+  "primeFactor": "37"
+}
+```
+
+call `ComputeAverage` RPC: (it's streaming, so when you want to quit, you have to enter `control + d` as a shutdown signal)
+
+```bash
+number (TYPE_INT32) => 1
+number (TYPE_INT32) => 2
+number (TYPE_INT32) => 3
+number (TYPE_INT32) => 23
+number (TYPE_INT32) => 114
+number (TYPE_INT32) => 534534
+number (TYPE_INT32) => 
+{
+  "average": 89112.83333333333
+}
+```
+
+call `FindMaximum` RPC:
+
+```bash
+calculator.CalculatorService@127.0.0.1:50051> call FindMaximum
+number (TYPE_INT32) => 3
+number (TYPE_INT32) => {
+  "maximum": 3
+}
+number (TYPE_INT32) => 4
+number (TYPE_INT32) => {
+  "maximum": 4
+}
+number (TYPE_INT32) => 2
+number (TYPE_INT32) => 6
+number (TYPE_INT32) => {
+  "maximum": 6
+}
+number (TYPE_INT32) => 10
+number (TYPE_INT32) => {
+  "maximum": 10
+}
+number (TYPE_INT32) => 
+```
+
+call `SquareRoot` RPC:
+
+```bash
+calculator.CalculatorService@127.0.0.1:50051> call SquareRoot
+number (TYPE_INT32) => 400
+{
+  "numberRoot": 20
+}
+
+calculator.CalculatorService@127.0.0.1:50051> call SquareRoot
+number (TYPE_INT32) => -42
+command call: failed to send a request: rpc error: code = InvalidArgument desc = Received a negative number: -42
+```
+
+---
