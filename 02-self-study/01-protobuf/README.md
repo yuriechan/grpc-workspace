@@ -12,10 +12,6 @@ Google Protobuf with examples and exercises. Code in Java Go Python. Say Goodbye
 
 **Protocol Buffers (protobuf)** is a fundamental data serialization format that every Data Engineer should know about. It is leveraged by many top tech companies such as Google and enables micro-services to transfer data in a format that is safe and efficient.
 
-**In this course, we are going to explore in depth, with hands-on lectures, all the aspects of Protocol Buffers 3.**
-
-In just a few hours, you will know everything you need to know to create simple and complex .proto files, and write code in your Favourite Programming language such as Java, Python and Go. Protocol Buffers generates all the boilerplate code for you!
-
 **Stop using XML and JSON and start using a Data Format that will allow you to create the most efficient APIs.**
 
 ---
@@ -26,14 +22,8 @@ In just a few hours, you will know everything you need to know to create simple 
 > Practice Exercises to Confirm the learnings
 > Leverage Imports and Packages appropriately
 > Generate Code using `protoc`
-> Code in Java with Protocol Buffers
+> Code in Golang with Protocol Buffers
 > Learn about advanced Protocol Buffers concepts
-
-**Note**: This course assumes you have some knowledge about Programming and JSON / XML
-
-**Instructor**: Stephane Maarek 
-
-## Section outline
 
 * **Protocol Buffers Course Introduction**:
   * Get an understand of the course objectives,
@@ -49,8 +39,6 @@ In just a few hours, you will know everything you need to know to create simple 
 * **Setting up Protoc Compiler**:
   * Setup the protoc compiler 
   * and learn how to generate code in any language
-* **Java Programming with Protocol Buffers**:
-  * Write your Protocol Buffers Data in Java
 * **Golang Programming with Protocol Buffers**:
   * Write your Protocol Buffers Data in Golang
 * **Data Evolution with Protobuf**:
@@ -62,20 +50,4 @@ In just a few hours, you will know everything you need to know to create simple 
     * and an introduction
   * to RPC Services with gRPC
 
-## What you’ll learn
-
-* Write simple and complex .proto files
-* Practice Exercises to Confirm the Learnings
-* Leverage Imports and Packages appropriately
-* Generate Code using `protoc` in any language
-* Code in Java with Protocol Buffers
-* Understand how Data Evolution works for Protobuf
-* Learn about advanced Protocol Buffers concepts
-* Are there any course requirements or prerequisites?
-* Some programming background (Java, Python or Go for example)
-* Previous experience with other formats such as XML or JSON is preferred
-
-## Who this course is for
-
-* Developers who want to understand how to write .proto files and write code to create Protocol Buffer data
-* Architects who want to understand how Protocol Buffers works and be useful for their solution architecture
+---
