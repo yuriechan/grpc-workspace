@@ -7,6 +7,10 @@ This is a personal note for studying gRPC (Golang) + modern API & Microservices
 * Protocol Buffer: [link](/protocol-buffers-3-java-golang-python/TOC.md)
 * gRPC - modern API & Microservices: [link](/grpc-modern-api-microservices/TOC.md)
 
+## Short Introduction
+
+* [Introduction to gRPC by Microsoft VisualStudio](https://www.youtube.com/watch?v=ru5x_hDZ9Qw)
+
 ## How to Instal
 
 ### 1. check out your go version:
