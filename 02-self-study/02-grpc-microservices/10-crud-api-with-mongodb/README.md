@@ -175,7 +175,211 @@ Thus, we can successfully run the MongoDB.
 
 ## 54. Blog Service Golang Setup
 
+### 54.1. Project Structure
+
+* create directory like this:
+
+```note
+blog
+  blog_client
+    client.go
+  blog_server
+    server.go
+  blog_pb
+    blog.proto
+
+calculator
+  ...
+
+greet
+  ...
+
+ssl
+  ...
 ---
+
+with this:
+
+```bash
+mkdir -pv blog/blog_client blog/blog_server blog/blogpb
+```
+
+### 54.2. Protobuf Definition
+
+at the `blog/blogpb/blog.proto`, let's define the protobuf like below
+
+```proto
+syntax = "proto3";
+
+package blog;
+
+option go_package = "blogpb";
+
+message Blog {
+  string id = 1;
+  string author_id = 2;
+  string title = 3;
+  string content = 4;
+}
+
+service BlogService {
+  
+}
+```
+
+and generate the code:
+
+```bash
+protoc blog/blogpb/blog.proto --go_out=plugins=grpc:.
+```
+
+and we get `blog/blogpb/blog.pb.go` file.
+
+### 54.3. Server
+
+We have `blog/blog_server/server.go` and it's empty file now.
+What we want to do is:
+
+* this time, we want to properly close the server
+* modify to our blog service
+
+so, first the simple code of the `server.go` looks like this:
+
+```go
+package main
+
+import (
+  "fmt"
+  "log"
+  "net"
+
+  "google.golang.org/grpc"
+
+  "../blogpb"
+)
+
+type server struct{}
+
+func main() {
+  fmt.Println("Blog Service Started")
+
+  lis, err := net.Listen("tcp", "0.0.0.0:50051") // 50051 is a default port for gRPC
+  if err != nil {
+    log.Fatalf("Failed to listen: %v", err)
+  }
+
+  opts := []grpc.ServerOption{}
+  s := grpc.NewServer(opts...)
+  blogpb.RegisterBlogServiceServer(s, &server{})
+
+  if err := s.Serve(lis); err != nil {
+    log.Fatalf("Failed to serve: %v", err)
+  }
+}
+```
+
+but, it's not really "graceful".
+
+> "How to properly stop the server?
+
+setup the "shut-down hook"
+
+```go
+package main
+
+import (
+  "fmt"
+  "log"
+  "net"
+  "os"
+  "os/signal"
+
+  "google.golang.org/grpc"
+
+  "../blogpb"
+)
+
+type server struct{}
+
+func main() {
+  fmt.Println("Blog Service Started")
+
+  lis, err := net.Listen("tcp", "0.0.0.0:50051") // 50051 is a default port for gRPC
+  if err != nil {
+    log.Fatalf("Failed to listen: %v", err)
+  }
+
+  opts := []grpc.ServerOption{}
+  s := grpc.NewServer(opts...)
+  blogpb.RegisterBlogServiceServer(s, &server{})
+
+  go func() {
+    fmt.Println("Starting Server...")
+    if err := s.Serve(lis); err != nil {
+      log.Fatalf("Failed to serve: %v", err)
+    }
+  }()
+
+  // With for Control C to exit
+  ch := make(chan os.Signal, 1)
+  signal.Notify(ch, os.Interrupt) // os.Interrupt by Control + C
+
+  // Block until a signal is received
+  <-ch
+  fmt.Println("Stopping the server")
+  s.Stop()
+  fmt.Println("Closing the listener")
+  lis.Close()
+  fmt.Println("End of Program")
+}
+```
+
+Run it and close the server with `Control + C`:
+
+```bash
+$ go run blog/blog_server/server.go 
+Blog Service Started
+Starting Server...
+^CStopping the server
+Closing the listener
+End of Program
+```
+
+In addition, we can improve the logging:
+
+```go
+// ...
+func main() {
+  // if we crash the go code, we get the file name and line number
+  log.SetFlags(log.LstdFlags | log.Lshortfile)
+
+  // ...
+```
+
+let's run the server:
+
+```bash
+$ go run blog/blog_server/server.go 
+Blog Service Started
+Starting Server...
+```
+
+run it on another terminal (to get error due to gRPC port is occupied):
+
+```bash
+$ go run blog/blog_server/server.go 
+Blog Service Started
+2020/04/06 02:01:51 server.go:25: Failed to listen: listen tcp 0.0.0.0:50051: bind: address already in use
+exit status 1
+```
+
+From the other terminal, you can see that which line of code has issue: (`server.go:25`) which is:
+
+```go
+    log.Fatalf("Failed to listen: %v", err)
+```
+
+so we can easily catch where to debug!
 
 ## 55. MongoDB Driver Golang Setup
 
