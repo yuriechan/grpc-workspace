@@ -9,6 +9,7 @@ This is a personal note for studying gRPC (Golang) + modern API & Microservices
 
 ## Short Introduction
 
+* [gRPC Introduction by Stephane Maarek](https://www.youtube.com/watch?v=XRXTsQwyZSU)
 * [Introduction to gRPC by Microsoft VisualStudio](https://www.youtube.com/watch?v=ru5x_hDZ9Qw)
 
 ## How to Instal
