@@ -694,6 +694,11 @@ Thus, we can see:
 
 ## 56. Code Changes
 
+* Important: Code Changes
+* Some MongoDB methods (just a few)
+* The changes are minor and summarized here: https://github.com/simplesteph/grpc-go-course/pull/1/files
+* the latest working code: https://github.com/simplesteph/grpc-go-course
+
 ---
 
 ## 57. CreageBlog Server
