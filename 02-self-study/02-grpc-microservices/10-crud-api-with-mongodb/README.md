@@ -699,9 +699,16 @@ Thus, we can see:
 * The changes are minor and summarized here: https://github.com/simplesteph/grpc-go-course/pull/1/files
 * the latest working code: https://github.com/simplesteph/grpc-go-course
 
+The changes are:
+
+* `mongo-go-driver/bson/primitive` (used to be: `mongo-go-driver/bson/objectid"`)
+* `primitive.ObjectID` (used to be: `objectid.ObjectID`)
+* `primitive.ObjectIDFromHex(blogID)` (used to be: `objectid.FromHex(blogID)`)
+* `bson.M{"_id": oid}` (used to be: `bson.NewDocument(bson.EC.ObjectID("_id", oid))`)
+
 ---
 
-## 57. CreageBlog Server
+## 57. CreateBlog Server
 
 ---
 
