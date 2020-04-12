@@ -913,6 +913,94 @@ Create blog request
 
 ---
 
+## 59. ReadBlog Server
+
+* add rpc for `ReadBlog`
+
+### 59.1. Protobuf
+
+```proto
+// ...
+
+message ReadBlogRequest {
+  string blog_id = 1;
+}
+
+message ReadBlogResponse {
+  Blog blog = 1;
+}
+
+service BlogService {
+  rpc CreateBlog (CreateBlogRequest) returns (CreateBlogResponse);
+  rpc ReadBlog (ReadBlogRequest) returns (ReadBlogResponse);  // return NOT_FOUND if not found
+}
+```
+
+and generate the code:
+
+```bash
+protoc blog/blogpb/blog.proto --go_out=plugins=grpc:.
+```
+
+or
+
+```bash
+source generation.sh
+```
+
+now, it's ready to write the server code
+
+### 59.2. Server
+
+* implement `blog/blog_server/server.go` with the new RPC, `ReadBlog`
+
+```go
+func (*server) ReadBlog(ctx context.Context, req *blogpb.ReadBlogRequest) (*blogpb.ReadBlogResponse, error) {
+  fmt.Println("Read blog request")
+  blogID := req.GetBlogId()
+
+  oid, err := primitive.ObjectIDFromHex(blogID)
+  if err != nil {
+    return nil, status.Errorf(
+      codes.InvalidArgument,
+      fmt.Sprintf("Cannot parse ID"),
+    )
+  }
+
+  // create an empty struct
+  data := &blogItem{}
+  filter := bson.M{"_id": oid}
+
+  res := collection.FindOne(context.Background(), filter)
+  if err := res.Decode(data); err != nil {
+    return nil, status.Errorf(
+      codes.NotFound,
+      fmt.Sprintf("Cannot find blog with specified ID: %v", err),
+    )
+  }
+
+  return &blogpb.ReadBlogResponse{
+    Blog: &blogpb.Blog{
+      Id:       data.ID.Hex(),
+      AuthorId: data.AuthorID,
+      Title:    data.Title,
+      Content:  data.Context,
+    },
+  }, nil
+}
+```
+
+check the server is runnable or not:
+
+```bash
+$ go run blog/blog_server/server.go
+Connecting to MongoDB
+Blog Service Started
+Starting Server...
+```
+
+---
+
 ## 60. ReadBlog Client
 
 ---
