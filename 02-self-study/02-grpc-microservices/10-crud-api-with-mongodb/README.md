@@ -1003,6 +1003,61 @@ Starting Server...
 
 ## 60. ReadBlog Client
 
+on the previous client code, inside of the `main()` funciton we add this:
+
+```go
+func main() {
+  // ...
+  fmt.Printf("Blog has been created: %v\n", createBlogRes)
+  blogID := createBlogRes.GetBlog().GetId()
+
+  // read Blog
+  fmt.Println("Reading the blog")
+
+  _, err2 := c.ReadBlog(context.Background(), &blogpb.ReadBlogRequest{BlogId:"5e93411f11844eecb9e7787d"})
+  if err2 != nil {
+    fmt.Printf("Error happened whilst reading: %v\n", err2)
+  }
+
+  readBlogReq := &blogpb.ReadBlogRequest{BlogId: blogID}
+  readBlogRes, readBlogErr := c.ReadBlog(context.Background(), readBlogReq)
+  if readBlogErr != nil {
+    fmt.Printf("Error happened whilst reading: %v\n", readBlogErr)
+  }
+
+  fmt.Printf("Blog was read: %v", readBlogRes)
+}
+```
+
+and run the server:
+
+```bash
+$ go run blog/blog_server/server.go
+Connecting to MongoDB
+Blog Service Started
+Starting Server...
+```
+
+then run the client:
+
+```bash
+$ go run blog/blog_client/client.go
+Blog Client
+Creating the blog
+Blog has been created: blog:<id:"5e93411f11844eecb9e7787c" author_id:"Mark" title:"My First Blog" content:"Content of the first blog" >
+Reading the blog
+Error happened whilst reading: rpc error: code = InvalidArgument desc = Cannot parse ID
+Blog was read: blog:<id:"5e93411f11844eecb9e7787c" author_id:"Mark" title:"My First Blog" content:"Content of the first blog" >
+```
+
+you get this message from server-side as well:
+
+```bash
+Create blog request
+Read blog request
+Read blog request
+```
+
 ---
 
 ## 61. UpdateBlog Server
