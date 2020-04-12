@@ -1279,6 +1279,62 @@ func (*server) DeleteBlog(ctx context.Context, req *blogpb.DeleteBlogRequest) (*
 
 ## 64. DeleteBlog Client
 
+add this code at the end of the current `func main()` of the client code:
+
+```go
+// ...
+func main() {
+  // ...
+
+  // delete Blog
+  deleteRes, deleteErr := c.DeleteBlog(context.Background(), &blogpb.DeleteBlogRequest{BlogId:blogID})
+  if deleteErr != nil {
+    fmt.Printf("Error happened whlist deleting: %v\n" deleteErr)
+  }
+
+  fmt.Printf("Blog was deleted: %v\n", deleteRes)
+}
+```
+
+run the server:
+
+```bash
+$ go run blog/blog_server/server.go
+Connecting to MongoDB
+Blog Service Started
+Starting Server...
+```
+
+run the client:
+
+```bash
+$ go run blog/blog_client/client.go
+Blog Client
+Creating the blog
+Blog has been created: blog:<id:"5e93585866f668aa7d1e4466" author_id:"Mark" title:"My First Blog" content:"Content of the first blog" >
+Reading the blog
+Error happened whilst reading: rpc error: code = NotFound desc = Cannot find blog with specified ID: mongo: no documents in result
+Blog was read: blog:<id:"5e93585866f668aa7d1e4466" author_id:"Mark" title:"My First Blog" content:"Content of the first blog" >
+Blog was read: blog:<id:"5e93585866f668aa7d1e4466" author_id:"Changed Author" title:"My First Blog (edited)" content:"Content of the first blog, with some awesome additions!" >
+Blog was deleted: blog_id:"5e93585866f668aa7d1e4466"
+```
+
+server also gets:
+
+```bash
+Create blog request
+Read blog request
+Read blog request
+Update blog request
+Delete blog request
+```
+
+* Thus we can see:
+  * (C)reate
+  * (R)ead
+  * (U)pdate
+  * (D)elete
+
 ---
 
 ## 65. ListBlog Server
