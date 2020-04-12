@@ -807,6 +807,110 @@ Starting Server...
 
 ## 58. CreateBlog Client
 
+* this would be similar to Greet service, so we will take `greet/greet_client/client.go`
+
+```go
+package main
+
+import (
+  "context"
+  "fmt"
+  "google.golang.org/grpc"
+  "log"
+
+  "../blogpb"
+)
+
+func main() {
+  fmt.Println("Blog Client")
+
+  opts := grpc.WithInsecure()
+
+  cc, err := grpc.Dial("localhost:50051", opts)
+  if err != nil {
+    log.Fatalf("could not connect: %v", err)
+  }
+  defer cc.Close()
+
+  c := blogpb.NewBlogServiceClient(cc)
+
+  // create Blog
+  fmt.Println("Creating the blog")
+  blog := &blogpb.Blog{
+    AuthorId: "Mark",
+    Title:    "My First Blog",
+    Content:  "Content of the first blog",
+  }
+  createBlogRes, err := c.CreateBlog(context.Background(), &blogpb.CreateBlogRequest{Blog: blog})
+  if err != nil {
+    log.Fatalf("Unexpected err: %v", err)
+  }
+  fmt.Printf("Blog has been created: %v", createBlogRes)
+}
+```
+
+in the previous part, we run the server, thus assume the server is running still:
+
+```bash
+$ go run blog/blog_server/server.go
+Connecting to MongoDB
+Blog Service Started
+Starting Server...
+```
+
+and in another terminal, run the client:
+
+```bash
+$ go run blog/blog_client/client.go
+Blog Client
+Creating the blog
+Blog has been created: blog:<id:"5e932a6cb7b07da9e40057a7" author_id:"Mark" title:"My First Blog" content:"Content of the first blog" >
+```
+
+but the server-side log does now show any, add more log on `blog/blog_server/server.go`. In this case, just for tracking purpose, we add simple print message at the beginning of the `func CreateBlog()`.
+
+```go
+// ...
+func (*server) CreateBlog(ctx context.Context, req *blogpb.CreateBlogRequest) (*blogpb.CreateBlogResponse, error) {
+  fmt.Println("Create blog request")
+  // ...
+```
+
+after this, run the server again:
+
+```bash
+$ go run blog/blog_server/server.go
+Connecting to MongoDB
+Blog Service Started
+Starting Server...
+```
+
+and run the client
+
+```bash
+$ go run blog/blog_client/client.go
+Blog Client
+Creating the blog
+Blog has been created: blog:<id:"5e932b620f97f9e193a3c5e8" author_id:"Mark" title:"My First Blog" content:"Content of the first blog" >
+```
+
+the server shows this message also:
+
+```bash
+Create blog request
+```
+
+### 58.1. How to Make Sure Everything Runs Correctly
+
+* Use Robo 3T
+* refresh the app
+  * there is `mydb` under `Localhost`
+  * under `mydb` we've got `Collections`
+  * under `Collections` we have `blog` and when you click it
+  * and we can see some objects
+
+![robo3t-with-data](./robo-3t-with-data.png)
+
 ---
 
 ## 60. ReadBlog Client
