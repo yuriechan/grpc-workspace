@@ -258,7 +258,8 @@ import (
   "../blogpb"
 )
 
-type server struct{}
+type server struct{
+}
 
 func main() {
   fmt.Println("Blog Service Started")
@@ -280,9 +281,9 @@ func main() {
 
 but, it's not really "graceful".
 
-> "How to properly stop the server?
+> "How to properly stop the server?"
 
-setup the "shut-down hook"
+setup the "shut-down hook" that is able to handle an interrupt signal.
 
 ```go
 package main
@@ -299,7 +300,8 @@ import (
   "../blogpb"
 )
 
-type server struct{}
+type server struct{
+}
 
 func main() {
   fmt.Println("Blog Service Started")
@@ -333,6 +335,16 @@ func main() {
   fmt.Println("End of Program")
 }
 ```
+
+so the code:
+
+```go
+  // With for Control C to exit
+  ch := make(chan os.Signal, 1)
+  signal.Notify(ch, os.Interrupt) // os.Interrupt by Control + C
+```
+
+can intercept the interrupt signal correctly. `os.Interrupt` is equivalent to `control + C`.
 
 Run it and close the server with `Control + C`:
 
@@ -380,6 +392,8 @@ From the other terminal, you can see that which line of code has issue: (`server
 ```
 
 so we can easily catch where to debug!
+
+---
 
 ## 55. MongoDB Driver Golang Setup
 
