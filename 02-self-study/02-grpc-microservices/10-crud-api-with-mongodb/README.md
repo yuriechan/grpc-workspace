@@ -397,6 +397,299 @@ so we can easily catch where to debug!
 
 ## 55. MongoDB Driver Golang Setup
 
+* next things we have to do:
+  * to setup MongoDB drivers for Go program
+  * Google `mongodb driver golang`
+    * you will find: [mongo-go-driver](https://github.com/mongodb/mongo-go-driver)
+      * there is [go-mgo](https://github.com/go-mgo/mgo) option, but we won't use it this time.
+
+how to instal:
+
+```bash
+go get github.com/mongodb/mongo-go-driver/mongo
+```
+
+NOTE:
+
+* mongo-go-driver is quite hard to use
+* might take some time to figure out how to use properly
+* there are some examples:
+  * [examples/documentation_examples](https://github.com/mongodb/mongo-go-driver/tree/master/examples/documentation_examples)
+* have a look [godoc/mongo](https://godoc.org/go.mongodb.org/mongo-driver/mongo)
+
+### 55.1. Mongo DB setup with the server.go
+
+Basic usage of the driver starts with creating a Client from a connection string. To do so, call the `NewClient` and `Connect` functions:
+
+We use insecure mode, so we don't need to put ID:password as "`mongodb:foo:bar@//localhost:27017`" but use this: "`mongodb://localhost:27017`"
+
+```go
+// connect to MongoDB
+client, err := mongo.NewClient(options.Client().ApplyURI("mongodb://localhost:27017"))
+if err != nil { log.Fatal(err) }
+ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+defer cancel()
+err = client.Connect(ctx)
+if err != nil { log.Fatal(err) }
+```
+
+and then, to run the database, what we have to do is "open up a collection", so we'll use our collection which is basically "**our table**".
+
+```go
+collection := client.Database("mydb").Collection("blog")
+```
+
+If the database (e.g. `mydb`) is not existed, it will create one for us. We can read the Go code above as
+
+> from the `client`, connect to the `Database` which is called `mydb`, collection-wise, use `blog` (collection basically means similar to a "table" of a relational database world))
+
+and we want to make the `collection` globally accessible:
+
+```go
+// ...
+
+var collection *mongo.Collection
+
+func main() {
+// ...
+}
+```
+
+We'll use this code for the `blog/blog_server/server.go`
+
+```go
+package main
+
+import (
+  "context"
+  "fmt"
+  "go.mongodb.org/mongo-driver/mongo"
+  "go.mongodb.org/mongo-driver/mongo/options"
+  "log"
+  "net"
+  "os"
+  "os/signal"
+  "time"
+
+  "google.golang.org/grpc"
+
+  "../blogpb"
+)
+
+var collection *mongo.Collection
+
+type server struct {
+}
+
+func main() {
+  // if we crash the go code, we get the file name and line number
+  log.SetFlags(log.LstdFlags | log.Lshortfile)
+
+  fmt.Println("Blog Service Started")
+
+  // connect to MongoDB
+  client, err := mongo.NewClient(options.Client().ApplyURI("mongodb://localhost:27017"))
+  if err != nil {
+    log.Fatal(err)
+  }
+  ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+  defer cancel()
+  err = client.Connect(ctx)
+  if err != nil {
+    log.Fatal(err)
+  }
+
+  collection = client.Database("mydb").Collection("blog")
+
+  lis, err := net.Listen("tcp", "0.0.0.0:50051") // 50051 is a default port for gRPC
+  if err != nil {
+    log.Fatalf("Failed to listen: %v", err)
+  }
+
+  opts := []grpc.ServerOption{}
+  s := grpc.NewServer(opts...)
+  blogpb.RegisterBlogServiceServer(s, &server{})
+
+  go func() {
+    fmt.Println("Starting Server...")
+    if err := s.Serve(lis); err != nil {
+      log.Fatalf("Failed to serve: %v", err)
+    }
+  }()
+
+  // With for Control C to exit
+  ch := make(chan os.Signal, 1)
+  signal.Notify(ch, os.Interrupt) // os.Interrupt by Control + C
+
+  // Block until a signal is received
+  <-ch
+  fmt.Println("Stopping the server")
+  s.Stop()
+  fmt.Println("Closing the listener")
+  lis.Close()
+  fmt.Println("End of Program")
+}
+```
+
+* Other things we have to do:
+  * creating a "data model" or "data definition"
+    * to hold the data over `blog` into a `MongoDB`
+    * need to define the types of each field and map them to [BSON](https://en.wikipedia.org/wiki/BSON)
+      * e.g. `ID primitive.ObjectID`, this is MongoDB specific thing
+      * `primitive.ObjectID` used to be `objectid.ObjectID`
+    * also we need to add data we defined at protobuf
+
+```go
+type blogItem struct {
+  ID       primitive.ObjectID
+  AuthorID string
+  Context  string
+  Title    string
+}
+```
+
+Then, we need to add "tags" to add `bson` information. For example:
+
+```go
+ID       primitive.ObjectID `bson:"_id,omitempty"`
+```
+
+means, the field `ID` is going to be mapped `bson` field, named `_id`, and it's not existed, we omitted it (since we are using `omitempty` option)
+
+```go
+type blogItem struct {
+  ID       primitive.ObjectID `bson:"_id,omitempty"`
+  AuthorID string             `bson:"author_id"`
+  Context  string             `bson:"context"`
+  Title    string             `bson:"title"`
+}
+```
+
+Finally, when we stop the server, we also need to stop the connection to the MongoDB.
+
+```go
+  // ...
+  lis.Close()
+  // ...
+  fmt.Println("Closing MongoDB Connection")
+  client.Disconnect(context.TODO())
+  fmt.Printlin("End of Program")
+}
+```
+
+Minor update is add logging on the right place for better logging:
+
+* `fmt.Println("Connecting to MongoDB")`
+* `fmt.Println("Blog Service Started")`
+
+The entire code looks like:
+
+```go
+package main
+
+import (
+  "context"
+  "fmt"
+  "go.mongodb.org/mongo-driver/bson/primitive"
+  "go.mongodb.org/mongo-driver/mongo"
+  "go.mongodb.org/mongo-driver/mongo/options"
+  "log"
+  "net"
+  "os"
+  "os/signal"
+  "time"
+
+  "google.golang.org/grpc"
+
+  "../blogpb"
+)
+
+var collection *mongo.Collection
+
+type server struct {
+}
+
+type blogItem struct {
+  ID       primitive.ObjectID `bson:"_id,omitempty"`
+  AuthorID string             `bson:"author_id"`
+  Context  string             `bson:"context"`
+  Title    string             `bson:"title"`
+}
+
+func main() {
+  // if we crash the go code, we get the file name and line number
+  log.SetFlags(log.LstdFlags | log.Lshortfile)
+
+  fmt.Println("Connecting to MongoDB")
+  // connect to MongoDB
+  client, err := mongo.NewClient(options.Client().ApplyURI("mongodb://localhost:27017"))
+  if err != nil {
+    log.Fatal(err)
+  }
+  ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+  defer cancel()
+  err = client.Connect(ctx)
+  if err != nil {
+    log.Fatal(err)
+  }
+
+  fmt.Println("Blog Service Started")
+  collection = client.Database("mydb").Collection("blog")
+
+  lis, err := net.Listen("tcp", "0.0.0.0:50051") // 50051 is a default port for gRPC
+  if err != nil {
+    log.Fatalf("Failed to listen: %v", err)
+  }
+
+  opts := []grpc.ServerOption{}
+  s := grpc.NewServer(opts...)
+  blogpb.RegisterBlogServiceServer(s, &server{})
+
+  go func() {
+    fmt.Println("Starting Server...")
+    if err := s.Serve(lis); err != nil {
+      log.Fatalf("Failed to serve: %v", err)
+    }
+  }()
+
+  // With for Control C to exit
+  ch := make(chan os.Signal, 1)
+  signal.Notify(ch, os.Interrupt) // os.Interrupt by Control + C
+
+  // Block until a signal is received
+  <-ch
+  fmt.Println("Stopping the server")
+  s.Stop()
+  fmt.Println("Closing the listener")
+  lis.Close()
+  fmt.Println("Closing MongoDB Connection")
+  client.Disconnect(context.TODO())
+  fmt.Println("End of Program")
+}
+```
+
+make sure all code works well:
+
+```bash
+$ go run blog/blog_server/server.go 
+Connecting to MongoDB
+Blog Service Started
+Starting Server...
+^CStopping the server
+Closing the listener
+Closing MongoDB Connection
+End of Program
+```
+
+Thus, we can see:
+
+* connect to the MongoDB, if success
+* start the server
+* got an interrupt signal, so stopping the server
+* closing the listener
+* closing the MongoDB connection
+* program ended
+
 ---
 
 ## 56. Code Changes
