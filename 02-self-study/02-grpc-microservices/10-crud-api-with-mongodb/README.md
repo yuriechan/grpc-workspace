@@ -1339,6 +1339,82 @@ Delete blog request
 
 ## 65. ListBlog Server
 
+### 65.1. Protobuf
+
+```proto
+message ListBlogRequest {
+
+}
+
+message ListBlogResponse {
+  Blog blog = 1;
+}
+
+
+service BlogService {
+  rpc CreateBlog (CreateBlogRequest) returns (CreateBlogResponse);
+  rpc ReadBlog (ReadBlogRequest) returns (ReadBlogResponse);  // return NOT_FOUND if not found
+  rpc UpdateBlog (UpdateBlogRequest) returns (UpdateBlogResponse);  // return NOT_FOUND if not found
+  rpc DeleteBlog (DeleteBlogRequest) returns (DeleteBlogResponse);  // return NOT_FOUND if not found
+  rpc ListBlog (ListBlogRequest) returns (stream ListBlogResponse);
+}
+```
+
+generate the code:
+
+```bash
+protoc blog/blogpb/blog.proto --go_out=plugins=grpc:.
+```
+
+### 65.2. Server
+
+```go
+func (*server) ListBlog(req *blogpb.ListBlogRequest, stream blogpb.BlogService_ListBlogServer) error {
+  fmt.Println("List blog request")
+  cur, err := collection.Find(context.Background(), nil) // since filter == nil, it will find every single blog in the database
+  if err != nil {
+    return status.Errorf(
+      codes.Internal,
+      fmt.Sprintf("Unknown internal error: %v", err),
+    )
+  }
+  defer cur.Close(context.Background()) // when this function exits, cur will be closed
+  // iterate over the cursor
+  for cur.Next(context.Background()) {
+    data := &blogItem{}
+    err := cur.Decode(data)
+    if err != nil {
+      return status.Errorf(
+        codes.Internal,
+        fmt.Sprintf("Error whilst decoding data from MongoDB: %v", err),
+      )
+    }
+    stream.Send(&blogpb.ListBlogResponse{Blog: dataToBlogPb(data)})
+  }
+  if err := cur.Err(); err != nil {
+    return status.Errorf(
+      codes.Internal,
+      fmt.Sprintf("Unknown internal error: %v", err),
+    )
+  }
+  return nil
+}
+```
+
+* can see the usage of `cursor`
+* how to interate amongst the `cursor` by using `cursor.Next()` function
+* using the stream to send data via `stream.Send()`
+  * a good usecase that streaming can be helpful when you have you have a database for backend
+
+see this can be run:
+
+```bash
+$ go run blog/blog_server/server.go
+Connecting to MongoDB
+Blog Service Started
+Starting Server...
+```
+
 ---
 
 ## 66. ListBlog Client
