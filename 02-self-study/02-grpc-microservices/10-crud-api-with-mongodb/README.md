@@ -1149,6 +1149,67 @@ NOTE: obviously we can use `collection.ReplaceOne` without using `collection.Fin
 
 ## 62. UpdateBlog Client
 
+We can simply add this code at the end of `func main()` of the client code:
+
+```go
+// ...
+
+func main() {
+  // ...
+
+  // update Blog
+  newBlog := &blogpb.Blog{
+    Id:       blogID,
+    AuthorId: "Changed Author",
+    Title:    "My First Blog (edited)",
+    Content:  "Content of the first blog, with some awesome additions!",
+  }
+
+  updateRes, updateErr := c.UpdateBlog(context.Background(), &blogpb.UpdateBlogRequest{Blog: newBlog})
+  if updateErr != nil {
+    fmt.Printf("Error happened whilst updating: %v\n", updateErr)
+  }
+  fmt.Printf("Blog was read: %v\n", updateRes)
+}
+```
+
+run the server:
+
+```bash
+$ go run blog/blog_server/server.go
+Connecting to MongoDB
+Blog Service Started
+Starting Server...
+```
+
+run the client:
+
+```bash
+$ go run blog/blog_client/client.go
+Blog Client
+Creating the blog
+Blog has been created: blog:<id:"5e9353c8a06e99328c8db55d" author_id:"Mark" title:"My First Blog" content:"Content of the first blog" >
+Reading the blog
+Error happened whilst reading: rpc error: code = NotFound desc = Cannot find blog with specified ID: mongo: no documents in result
+Blog was read: blog:<id:"5e9353c8a06e99328c8db55d" author_id:"Mark" title:"My First Blog" content:"Content of the first blog" >
+Blog was read: blog:<id:"5e9353c8a06e99328c8db55d" author_id:"Changed Author" title:"My First Blog (edited)" content:"Content of the first blog, with some awesome additions!" >
+```
+
+and server get:
+
+```bash
+Create blog request
+Read blog request
+Read blog request
+Update blog request
+```
+
+thus, we can see it updates the data.
+
+We can also see the updates from Robo 3T
+
+![robo3t-with-update](robo-3t-with-update.png)
+
 ---
 
 ## 63. DeleteBlog Server

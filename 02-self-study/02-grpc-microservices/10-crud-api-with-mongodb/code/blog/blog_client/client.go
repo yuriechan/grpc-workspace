@@ -39,7 +39,7 @@ func main() {
 	// read Blog
 	fmt.Println("Reading the blog")
 
-	_, err2 := c.ReadBlog(context.Background(), &blogpb.ReadBlogRequest{BlogId:"5e93411f11844eecb9e7787d"})
+	_, err2 := c.ReadBlog(context.Background(), &blogpb.ReadBlogRequest{BlogId: "5e93411f11844eecb9e7787d"})
 	if err2 != nil {
 		fmt.Printf("Error happened whilst reading: %v\n", err2)
 	}
@@ -51,4 +51,18 @@ func main() {
 	}
 
 	fmt.Printf("Blog was read: %v\n", readBlogRes)
+
+	// update Blog
+	newBlog := &blogpb.Blog{
+		Id:       blogID,
+		AuthorId: "Changed Author",
+		Title:    "My First Blog (edited)",
+		Content:  "Content of the first blog, with some awesome additions!",
+	}
+
+	updateRes, updateErr := c.UpdateBlog(context.Background(), &blogpb.UpdateBlogRequest{Blog: newBlog})
+	if updateErr != nil {
+		fmt.Printf("Error happened whilst updating: %v\n", updateErr)
+	}
+	fmt.Printf("Blog was read: %v\n", updateRes)
 }
