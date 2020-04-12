@@ -1062,6 +1062,89 @@ Read blog request
 
 ## 61. UpdateBlog Server
 
+In the previous part, we learnt how to do "read", so here, we are going to cover how to "update" the data.
+
+### 61.1. Protobuf
+
+```proto
+message UpdateBlogRequest {
+  Blog blog = 1;
+}
+
+message UpdateBlogResponse {
+  Blog blog = 1;
+}
+
+service BlogService {
+  rpc CreateBlog (CreateBlogRequest) returns (CreateBlogResponse);
+  rpc ReadBlog (ReadBlogRequest) returns (ReadBlogResponse);  // return NOT_FOUND if not found
+  rpc UpdateBlog (UpdateBlogRequest) returns (UpdateBlogResponse);  // return NOT_FOUND if not found
+}
+```
+
+and generate the code:
+
+```bash
+protoc blog/blogpb/blog.proto --go_out=plugins=grpc:.
+```
+
+### 61.2. Server
+
+```go
+
+func dataToBlogPb(data *blogItem) *blogpb.Blog {
+  return &blogpb.Blog{
+    Id:       data.ID.Hex(),
+    AuthorId: data.AuthorID,
+    Title:    data.Title,
+    Content:  data.Context,
+  }
+}
+
+func (*server) UpdateBlog(ctx context.Context, req *blogpb.UpdateBlogRequest) (*blogpb.UpdateBlogResponse, error) {
+  fmt.Println("Update blog request")
+  blog := req.GetBlog()
+  oid, err := primitive.ObjectIDFromHex(blog.GetId())
+  if err != nil {
+    return nil, status.Errorf(
+      codes.InvalidArgument,
+      fmt.Sprintf("Cannot parse ID"),
+    )
+  }
+
+  // create an empty struct
+  data := &blogItem{}
+  filter := bson.M{"_id": oid}
+
+  res := collection.FindOne(context.Background(), filter)
+  if err := res.Decode(data); err != nil {
+    return nil, status.Errorf(
+      codes.NotFound,
+      fmt.Sprintf("Cannot find blog with specified ID: %v", err),
+    )
+  }
+
+  // we update our internal struct
+  data.AuthorID = blog.GetAuthorId()
+  data.Context = blog.GetContent()
+  data.Title = blog.GetTitle()
+
+  _, updateErr := collection.ReplaceOne(context.Background(), filter, data)
+  if updateErr != nil {
+    return nil, status.Errorf(
+      codes.Internal,
+      fmt.Sprintf("Cannot update object in MongoDB: %v", updateErr),
+    )
+  }
+
+  return &blogpb.UpdateBlogResponse{
+    Blog: dataToBlogPb(data),
+  }, nil
+}
+```
+
+NOTE: obviously we can use `collection.ReplaceOne` without using `collection.FindOne` to reduce 2 database calls to 1 database call.
+
 ---
 
 ## 62. UpdateBlog Client
