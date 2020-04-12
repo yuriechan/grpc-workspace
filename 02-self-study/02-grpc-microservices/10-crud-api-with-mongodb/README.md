@@ -710,6 +710,99 @@ The changes are:
 
 ## 57. CreateBlog Server
 
+### 57.1. Protobuf
+
+```proto
+syntax = "proto3";
+
+package blog;
+
+option go_package = "blogpb";
+
+message Blog {
+  string id = 1;
+  string author_id = 2;
+  string title = 3;
+  string content = 4;
+}
+
+message CreateBlogRequest {
+  Blog blog = 1;
+}
+
+message CreateBlogResponse {
+  Blog blog = 1;  // will have a blog id
+}
+
+service BlogService {
+  rpc CreateBlog (CreateBlogRequest) returns (CreateBlogResponse)
+}
+```
+
+and generate our code:
+
+```bash
+protoc blog/blogpb/blog.proto --go_out=plugins=grpc:.
+```
+
+### 57.2. Server
+
+* implement `CreateBlog()` at `blog/blog_server/server.go`
+  * parse the contents of the request and pass it to our database, MongoDB
+
+```go
+func (*server) CreateBlog(ctx context.Context, req *blogpb.CreateBlogRequest) (*blogpb.CreateBlogResponse, error) {
+  // ...
+}
+```
+
+here is the result:
+
+```go
+func (*server) CreateBlog(ctx context.Context, req *blogpb.CreateBlogRequest) (*blogpb.CreateBlogResponse, error) {
+  blog := req.GetBlog()
+
+  data := blogItem{
+    AuthorID: blog.GetAuthorId(),
+    Context:  blog.GetContent(),
+    Title:    blog.GetTitle(),
+  }
+
+  res, err := collection.InsertOne(context.Background(), data)
+  if err != nil {
+    return nil, status.Errorf(
+      codes.Internal,
+      fmt.Sprintf("Internal error: %v", err),
+    )
+  }
+  oid, ok := res.InsertedID.(primitive.ObjectID) // oid means an object ID
+  if !ok {
+    return nil, status.Errorf(
+      codes.Internal,
+      fmt.Sprintf("Cannot convert to OID"),
+    )
+  }
+
+  return &blogpb.CreateBlogResponse{
+    Blog: &blogpb.Blog{
+      Id:       oid.Hex(),
+      AuthorId: blog.GetAuthorId(),
+      Title:    blog.GetTitle(),
+      Content:  blog.GetContent(),
+    },
+  }, nil
+}
+```
+
+make sure the server can be run:
+
+```bash
+$ go run blog/blog_server/server.go
+Connecting to MongoDB
+Blog Service Started
+Starting Server...
+```
+
 ---
 
 ## 58. CreateBlog Client
