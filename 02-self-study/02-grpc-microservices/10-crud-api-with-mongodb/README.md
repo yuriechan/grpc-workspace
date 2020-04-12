@@ -1214,6 +1214,67 @@ We can also see the updates from Robo 3T
 
 ## 63. DeleteBlog Server
 
+### 63.1. Protobuf
+
+```proto
+message DeleteBlogRequest {
+  string blog_id = 1;
+}
+
+message DeleteBlogResponse {
+  string blog_id = 1;
+}
+
+service BlogService {
+  rpc CreateBlog (CreateBlogRequest) returns (CreateBlogResponse);
+  rpc ReadBlog (ReadBlogRequest) returns (ReadBlogResponse);  // return NOT_FOUND if not found
+  rpc UpdateBlog (UpdateBlogRequest) returns (UpdateBlogResponse);  // return NOT_FOUND if not found
+  rpc DeleteBlog (DeleteBlogRequest) returns (DeleteBlogResponse);  // return NOT_FOUND if not found
+}
+```
+
+generate the code:
+
+```bash
+protoc blog/blogpb/blog.proto --go_out=plugins=grpc:.
+```
+
+### 63.2. Server
+
+```go
+func (*server) DeleteBlog(ctx context.Context, req *blogpb.DeleteBlogRequest) (*blogpb.DeleteBlogResponse, error) {
+  fmt.Println("Delete blog request")
+  oid, err := primitive.ObjectIDFromHex(req.GetBlogId())
+  if err != nil {
+    return nil, status.Errorf(
+      codes.InvalidArgument,
+      fmt.Sprintf("Cannot parse ID"),
+    )
+  }
+
+  filter := bson.M{"_id": oid}
+
+  res, err := collection.DeleteOne(context.Background(), filter)
+  if err != nil {
+    return nil, status.Errorf(
+      codes.Internal,
+      fmt.Sprintf("Cannot delete object in MongoDB: %v", err),
+    )
+  }
+
+  if res.DeletedCount == 0 {
+    return nil, status.Errorf(
+      codes.NotFound,
+      fmt.Sprintf("Cannot find blog in MongoDB: %v", err),
+    )
+  }
+
+  return &blogpb.DeleteBlogResponse{
+    BlogId: req.GetBlogId(),
+  }, nil
+}
+```
+
 ---
 
 ## 64. DeleteBlog Client
