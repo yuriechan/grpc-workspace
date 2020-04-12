@@ -178,7 +178,7 @@ func (*server) DeleteBlog(ctx context.Context, req *blogpb.DeleteBlogRequest) (*
 
 func (*server) ListBlog(req *blogpb.ListBlogRequest, stream blogpb.BlogService_ListBlogServer) error {
 	fmt.Println("List blog request")
-	cur, err := collection.Find(context.Background(), nil) // since filter == nil, it will find every single blog in the database
+	cur, err := collection.Find(context.Background(), bson.D{{}}) // since filter is empty, it will find every single blog in the database
 	if err != nil {
 		return status.Errorf(
 			codes.Internal,

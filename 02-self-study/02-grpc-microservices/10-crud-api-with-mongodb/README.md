@@ -1371,7 +1371,7 @@ protoc blog/blogpb/blog.proto --go_out=plugins=grpc:.
 ```go
 func (*server) ListBlog(req *blogpb.ListBlogRequest, stream blogpb.BlogService_ListBlogServer) error {
   fmt.Println("List blog request")
-  cur, err := collection.Find(context.Background(), nil) // since filter == nil, it will find every single blog in the database
+  cur, err := collection.Find(context.Background(), bson.D{{}}) // since filter is empty, it will find every single blog in the database
   if err != nil {
     return status.Errorf(
       codes.Internal,
@@ -1418,6 +1418,65 @@ Starting Server...
 ---
 
 ## 66. ListBlog Client
+
+```go
+// ...
+
+func main() {
+  // ...
+
+  // list Blogs
+  stream, err := c.ListBlog(context.Background(), &blogpb.ListBlogRequest{})
+  if err != nil {
+    log.Fatalf("error whilst calling ListBlog RPC: %v", err)
+  }
+  for {
+    res, err := stream.Recv()
+    if err != io.EOF {
+      break
+    }
+    if err != nil {
+      log.Fatalf("Something happened: %v", err)
+    }
+    fmt.Println(res.GetBlog())
+  }
+}
+```
+
+server is running, thus, run the client:
+
+```bash
+$ go run blog/blog_client/client.go
+Blog Client
+Creating the blog
+Blog has been created: blog:<id:"5e93604e82d461ebf63d66d2" author_id:"Mark" title:"My First Blog" content:"Content of the first blog" >
+Reading the blog
+Error happened whilst reading: rpc error: code = NotFound desc = Cannot find blog with specified ID: mongo: no documents in result
+Blog was read: blog:<id:"5e93604e82d461ebf63d66d2" author_id:"Mark" title:"My First Blog" content:"Content of the first blog" >
+Blog was read: blog:<id:"5e93604e82d461ebf63d66d2" author_id:"Changed Author" title:"My First Blog (edited)" content:"Content of the first blog, with some awesome additions!" >
+Blog was deleted: blog_id:"5e93604e82d461ebf63d66d2"
+id:"5e932a6cb7b07da9e40057a7" author_id:"Mark" title:"My First Blog" content:"Content of the first blog"
+id:"5e932ab6b7b07da9e40057a8" author_id:"Mark" title:"My First Blog" content:"Content of the first blog"
+id:"5e932b620f97f9e193a3c5e8" author_id:"Mark" title:"My First Blog" content:"Content of the first blog"
+id:"5e933f896d0f1f057f79c130" author_id:"Mark" title:"My First Blog" content:"Content of the first blog"
+id:"5e9340196f97db4224a6c358" author_id:"Mark" title:"My First Blog" content:"Content of the first blog"
+id:"5e93408611844eecb9e7787a" author_id:"Mark" title:"My First Blog" content:"Content of the first blog"
+id:"5e9340a011844eecb9e7787b" author_id:"Mark" title:"My First Blog" content:"Content of the first blog"
+id:"5e93411f11844eecb9e7787c" author_id:"Mark" title:"My First Blog" content:"Content of the first blog"
+id:"5e93415b11844eecb9e7787d" author_id:"Mark" title:"My First Blog" content:"Content of the first blog"
+id:"5e9353c8a06e99328c8db55d" author_id:"Changed Author" title:"My First Blog (edited)" content:"Content of the first blog, with some awesome additions!"
+```
+
+and server gets:
+
+```bash
+Create blog request
+Read blog request
+Read blog request
+Update blog request
+Delete blog request
+List blog request
+```
 
 ---
 
