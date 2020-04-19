@@ -1482,4 +1482,347 @@ List blog request
 
 ## 67. Evans CLI test with CRUD
 
+* simply implement the reflection by adding this code:
+
+```go
+// Register reflection service on gRPC server.
+reflection.Register(s)
+```
+
+to `func main()` so it should looks like:
+
+```go
+// ...
+
+func main() {
+  // ...
+
+  opts := []grpc.ServerOption{}
+  s := grpc.NewServer(opts...)
+  blogpb.RegisterBlogServiceServer(s, &server{})
+
+  // Register reflection service on gRPC server.
+  reflection.Register(s)
+  
+  // ...
+}
+```
+
+Now, the reflection is enabled!
+
+Let's restart our server:
+
+```bash
+$ go run blog/blog_server/server.go
+Connecting to MongoDB
+Blog Service Started
+Starting Server...
+```
+
+and use Evans:
+
+```bash
+$ evans -p 50051 -r
+
+  ______
+ |  ____|
+ | |__    __   __   __ _   _ __    ___
+ |  __|   \ \ / /  / _. | | '_ \  / __|
+ | |____   \ V /  | (_| | | | | | \__ \
+ |______|   \_/    \__,_| |_| |_| |___/
+
+ more expressive universal gRPC client
+
+
+blog.BlogService@127.0.0.1:50051> 
+```
+
+now we've got into the interactive mode:
+
+```bash
+blog.BlogService@127.0.0.1:50051> show service
++-------------+------------+-------------------+--------------------+
+|   SERVICE   |    RPC     |   REQUEST TYPE    |   RESPONSE TYPE    |
++-------------+------------+-------------------+--------------------+
+| BlogService | CreateBlog | CreateBlogRequest | CreateBlogResponse |
+| BlogService | ReadBlog   | ReadBlogRequest   | ReadBlogResponse   |
+| BlogService | UpdateBlog | UpdateBlogRequest | UpdateBlogResponse |
+| BlogService | DeleteBlog | DeleteBlogRequest | DeleteBlogResponse |
+| BlogService | ListBlog   | ListBlogRequest   | ListBlogResponse   |
++-------------+------------+-------------------+--------------------+
+```
+
+select the blog service:
+
+```bash
+blog.BlogService@127.0.0.1:50051> service BlogService
+```
+
+calling CreateBlog:
+
+```bash
+blog.BlogService@127.0.0.1:50051> call CreateBlog
+blog::id (TYPE_STRING) => 
+blog::author_id (TYPE_STRING) => "Mark"
+blog::title (TYPE_STRING) => "Blog with spaces, cool title"
+blog::content (TYPE_STRING) => "This is a blog that was created using the CLI"
+{
+  "blog": {
+    "id": "5e946523f1041074206ebd6b",
+    "authorId": "\"Mark\"",
+    "title": "\"Blog with spaces, cool title\"",
+    "content": "\"This is a blog that was created using the CLI\""
+  }
+}
+```
+
+call ListBlog:
+
+```bash
+blog.BlogService@127.0.0.1:50051> call ListBlog
+{
+  "blog": {
+    "id": "5e932a6cb7b07da9e40057a7",
+    "authorId": "Mark",
+    "title": "My First Blog",
+    "content": "Content of the first blog"
+  }
+}
+{
+  "blog": {
+    "id": "5e932ab6b7b07da9e40057a8",
+    "authorId": "Mark",
+    "title": "My First Blog",
+    "content": "Content of the first blog"
+  }
+}
+{
+  "blog": {
+    "id": "5e932b620f97f9e193a3c5e8",
+    "authorId": "Mark",
+    "title": "My First Blog",
+    "content": "Content of the first blog"
+  }
+}
+{
+  "blog": {
+    "id": "5e933f896d0f1f057f79c130",
+    "authorId": "Mark",
+    "title": "My First Blog",
+    "content": "Content of the first blog"
+  }
+}
+{
+  "blog": {
+    "id": "5e9340196f97db4224a6c358",
+    "authorId": "Mark",
+    "title": "My First Blog",
+    "content": "Content of the first blog"
+  }
+}
+{
+  "blog": {
+    "id": "5e93408611844eecb9e7787a",
+    "authorId": "Mark",
+    "title": "My First Blog",
+    "content": "Content of the first blog"
+  }
+}
+{
+  "blog": {
+    "id": "5e9340a011844eecb9e7787b",
+    "authorId": "Mark",
+    "title": "My First Blog",
+    "content": "Content of the first blog"
+  }
+}
+{
+  "blog": {
+    "id": "5e93411f11844eecb9e7787c",
+    "authorId": "Mark",
+    "title": "My First Blog",
+    "content": "Content of the first blog"
+  }
+}
+{
+  "blog": {
+    "id": "5e93415b11844eecb9e7787d",
+    "authorId": "Mark",
+    "title": "My First Blog",
+    "content": "Content of the first blog"
+  }
+}
+{
+  "blog": {
+    "id": "5e9353c8a06e99328c8db55d",
+    "authorId": "Changed Author",
+    "title": "My First Blog (edited)",
+    "content": "Content of the first blog, with some awesome additions!"
+  }
+}
+{
+  "blog": {
+    "id": "5e946523f1041074206ebd6b",
+    "authorId": "\"Mark\"",
+    "title": "\"Blog with spaces, cool title\"",
+    "content": "\"This is a blog that was created using the CLI\""
+  }
+}
+```
+
+try to delete id with `5e93415b11844eecb9e7787d`:
+
+```bash
+blog.BlogService@127.0.0.1:50051> call DeleteBlog
+blog_id (TYPE_STRING) => 5e93415b11844eecb9e7787d
+{
+  "blogId": "5e93415b11844eecb9e7787d"
+}
+```
+
+check the id is actually deleted:
+
+```bash
+
+blog.BlogService@127.0.0.1:50051> call DeleteBlog
+blog_id (TYPE_STRING) => 5e93415b11844eecb9e7787d
+command call: failed to send a request: rpc error: code = NotFound desc = Cannot find blog in MongoDB: <nil>
+```
+
+call ListBlog again:
+
+```bash
+blog.BlogService@127.0.0.1:50051> call ListBlog
+{
+  "blog": {
+    "id": "5e932a6cb7b07da9e40057a7",
+    "authorId": "Mark",
+    "title": "My First Blog",
+    "content": "Content of the first blog"
+  }
+}
+{
+  "blog": {
+    "id": "5e932ab6b7b07da9e40057a8",
+    "authorId": "Mark",
+    "title": "My First Blog",
+    "content": "Content of the first blog"
+  }
+}
+{
+  "blog": {
+    "id": "5e932b620f97f9e193a3c5e8",
+    "authorId": "Mark",
+    "title": "My First Blog",
+    "content": "Content of the first blog"
+  }
+}
+{
+  "blog": {
+    "id": "5e933f896d0f1f057f79c130",
+    "authorId": "Mark",
+    "title": "My First Blog",
+    "content": "Content of the first blog"
+  }
+}
+{
+  "blog": {
+    "id": "5e9340196f97db4224a6c358",
+    "authorId": "Mark",
+    "title": "My First Blog",
+    "content": "Content of the first blog"
+  }
+}
+{
+  "blog": {
+    "id": "5e93408611844eecb9e7787a",
+    "authorId": "Mark",
+    "title": "My First Blog",
+    "content": "Content of the first blog"
+  }
+}
+{
+  "blog": {
+    "id": "5e9340a011844eecb9e7787b",
+    "authorId": "Mark",
+    "title": "My First Blog",
+    "content": "Content of the first blog"
+  }
+}
+{
+  "blog": {
+    "id": "5e93411f11844eecb9e7787c",
+    "authorId": "Mark",
+    "title": "My First Blog",
+    "content": "Content of the first blog"
+  }
+}
+{
+  "blog": {
+    "id": "5e9353c8a06e99328c8db55d",
+    "authorId": "Changed Author",
+    "title": "My First Blog (edited)",
+    "content": "Content of the first blog, with some awesome additions!"
+  }
+}
+{
+  "blog": {
+    "id": "5e946523f1041074206ebd6b",
+    "authorId": "\"Mark\"",
+    "title": "\"Blog with spaces, cool title\"",
+    "content": "\"This is a blog that was created using the CLI\""
+  }
+}
+```
+
+and read `5e9353c8a06e99328c8db55d`:
+
+```bash
+blog.BlogService@127.0.0.1:50051> call ReadBlog
+blog_id (TYPE_STRING) => 5e9353c8a06e99328c8db55d
+{
+  "blog": {
+    "id": "5e9353c8a06e99328c8db55d",
+    "authorId": "Changed Author",
+    "title": "My First Blog (edited)",
+    "content": "Content of the first blog, with some awesome additions!"
+  }
+}
+```
+
+we can also update the data:
+
+```bash
+
+blog.BlogService@127.0.0.1:50051> call UpdateBlog
+blog::id (TYPE_STRING) => 5e9353c8a06e99328c8db55d
+blog::author_id (TYPE_STRING) => Changed Author
+blog::title (TYPE_STRING) => Changed Title
+blog::content (TYPE_STRING) => Changed Content
+{
+  "blog": {
+    "id": "5e9353c8a06e99328c8db55d",
+    "authorId": "Changed Author",
+    "title": "Changed Title",
+    "content": "Changed Content"
+  }
+```
+
+and check the update has applied or not by using `ReadBlog` RPC:
+
+```bash
+blog.BlogService@127.0.0.1:50051> call ReadBlog
+blog_id (TYPE_STRING) => 5e9353c8a06e99328c8db55d
+{
+  "blog": {
+    "id": "5e9353c8a06e99328c8db55d",
+    "authorId": "Changed Author",
+    "title": "Changed Title",
+    "content": "Changed Content"
+  }
+}
+```
+
+
 ---
+
