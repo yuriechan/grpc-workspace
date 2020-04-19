@@ -1,4 +1,4 @@
-# Session 10: [Hands-On] CRUD API with MongoDB 
+# Session 10: [Hands-On] CRUD API with MongoDB
 
 ---
 
@@ -143,8 +143,8 @@ Thus, we can successfully run the MongoDB.
 
 * Install MongoDB on Windows
   * If you're having issues, please look at these tutorials:
-    * https://docs.mongodb.com/manual/tutorial/install-mongodb-on-windows/
-    * https://treehouse.github.io/installation-guides/windows/mongo-windows.html
+    * [instal mongodb on windows](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-windows/)
+    * [mongo-windows](https://treehouse.github.io/installation-guides/windows/mongo-windows.html)
   * If you want to use a custom data directory
     * Create C:/database_mongo
     * mongod --dbpath=C:/database_mongo/
@@ -349,7 +349,7 @@ can intercept the interrupt signal correctly. `os.Interrupt` is equivalent to `c
 Run it and close the server with `Control + C`:
 
 ```bash
-$ go run blog/blog_server/server.go 
+$ go run blog/blog_server/server.go
 Blog Service Started
 Starting Server...
 ^CStopping the server
@@ -371,7 +371,7 @@ func main() {
 let's run the server:
 
 ```bash
-$ go run blog/blog_server/server.go 
+$ go run blog/blog_server/server.go
 Blog Service Started
 Starting Server...
 ```
@@ -379,7 +379,7 @@ Starting Server...
 run it on another terminal (to get error due to gRPC port is occupied):
 
 ```bash
-$ go run blog/blog_server/server.go 
+$ go run blog/blog_server/server.go
 Blog Service Started
 2020/04/06 02:01:51 server.go:25: Failed to listen: listen tcp 0.0.0.0:50051: bind: address already in use
 exit status 1
@@ -671,7 +671,7 @@ func main() {
 make sure all code works well:
 
 ```bash
-$ go run blog/blog_server/server.go 
+$ go run blog/blog_server/server.go
 Connecting to MongoDB
 Blog Service Started
 Starting Server...
@@ -696,8 +696,8 @@ Thus, we can see:
 
 * Important: Code Changes
 * Some MongoDB methods (just a few)
-* The changes are minor and summarized here: https://github.com/simplesteph/grpc-go-course/pull/1/files
-* the latest working code: https://github.com/simplesteph/grpc-go-course
+* The changes are minor and summarized [here](https://github.com/simplesteph/grpc-go-course/pull/1/files)
+* the latest working code: [here](https://github.com/simplesteph/grpc-go-course)
 
 The changes are:
 
@@ -1534,7 +1534,7 @@ $ evans -p 50051 -r
  more expressive universal gRPC client
 
 
-blog.BlogService@127.0.0.1:50051> 
+blog.BlogService@127.0.0.1:50051>
 ```
 
 now we've got into the interactive mode:
@@ -1562,7 +1562,7 @@ calling CreateBlog:
 
 ```bash
 blog.BlogService@127.0.0.1:50051> call CreateBlog
-blog::id (TYPE_STRING) => 
+blog::id (TYPE_STRING) =>
 blog::author_id (TYPE_STRING) => "Mark"
 blog::title (TYPE_STRING) => "Blog with spaces, cool title"
 blog::content (TYPE_STRING) => "This is a blog that was created using the CLI"
@@ -1823,6 +1823,4 @@ blog_id (TYPE_STRING) => 5e9353c8a06e99328c8db55d
 }
 ```
 
-
 ---
-
