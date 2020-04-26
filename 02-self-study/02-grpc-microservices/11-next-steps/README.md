@@ -63,6 +63,18 @@ Try to have a look how `.proto` files are defined in the real world and see the 
 
 ## 69. What about Gogo?
 
+* In the open source world, it is not unusual to see active community members fork a popular project and add features they find the community needs.
+
+* One notable project is "`gogo`", created by Walter Schulze, which aims to provide an alternative at how Protocol Buffers and gRPC are implemented in Go.
+
+* This different implementation from the one provided by Google has many benefits, mainly around performance and usability, as well as providing more code generation options, which makes this project one of the most important in the gRPC ecosystem today.
+
+* You can find the project alongside its 1800+ stars on GitHub here: https://github.com/gogo/protobuf
+
+* If you'd like to read about it, I strongly recommend this blog: https://jbrandhorst.com/post/gogoproto/
+
+* Regardless of the implementation you will use for your projects, the gRPC concepts are the exact same. Happy learning!
+
 ---
 
 ## 70. Next Steps
