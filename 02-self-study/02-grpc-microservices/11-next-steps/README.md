@@ -79,4 +79,10 @@ Try to have a look how `.proto` files are defined in the real world and see the 
 
 ## 70. Next Steps
 
+* read the documentation: [https://grpc.io/](https://grpc.io/)
+* trying migrate your REST API to gRPC or use a new project to experiment with gRPC
+* the gRPC ecosystem is booming,
+  * stay up to date with the gRPC & Protocol Buffers release and on the lookout for new projects
+* play with the technology and have some fun!
+
 ---
