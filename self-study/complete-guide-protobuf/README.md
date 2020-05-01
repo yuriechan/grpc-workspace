@@ -2,17 +2,13 @@
 
 This sub-repo has been built for self study purpose with a Udemy course for [Protocol Buffers 3](https://www.udemy.com/protocol-buffers/learn/v4/overview)
 
-Please check out the notes: [Click HERE!](TOC.md)
-
 ## About this course
 
 Google Protobuf with examples and exercises. Code in Java Go Python. Say Goodbye to JSON & XML. Pre-req to gRPC
 
 ## Description
 
-**Protocol Buffers (protobuf)** is a fundamental data serialization format that every Data Engineer should know about. It is leveraged by many top tech companies such as Google and enables micro-services to transfer data in a format that is safe and efficient.
-
-**Stop using XML and JSON and start using a Data Format that will allow you to create the most efficient APIs.**
+**Protocol Buffers (protobuf)** is a fundamental data serialization format that every Data Engineer should know about. It is leveraged by many top tech companies such as Google and enables micro-services to transfer data in a format that is safe and efficient. **Stop using XML and JSON and start using a Data Format that will allow you to create the most efficient APIs.**
 
 ---
 
@@ -52,7 +48,7 @@ Google Protobuf with examples and exercises. Code in Java Go Python. Say Goodbye
 
 ---
 
-# Table of Contents
+## Table of Contents
 
 * [Section 1. Course Introduction](01-course-introduction/README.md)
 
@@ -75,6 +71,5 @@ Google Protobuf with examples and exercises. Code in Java Go Python. Say Goodbye
 * [Section 10. Protocol Buffers Advanced](10-protocol-buffers-advanced/README.md)
 
 * [Section 11. Next Steps](11-next-steps/README.md)
-
 
 ---
