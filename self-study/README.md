@@ -9,7 +9,7 @@ I put them here as personal notes.
 
 ## Table of Contents
 
-* [protobuf3](https://github.com/TangoEnSkai/grpc-workspace/tree/master/02-self-study/01-protobuf)
-* [grpc with go](https://github.com/TangoEnSkai/grpc-workspace/tree/master/02-self-study/02-grpc-microservices)
+* [protobuf3](./complete-guide-protobuf/README.md)
+* [grpc with go](./grpc-masterclass/README.md))
 
 ---
