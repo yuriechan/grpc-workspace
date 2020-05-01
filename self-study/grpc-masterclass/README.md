@@ -16,24 +16,22 @@ gRPC is a new and modern framework for building scalable, modern and fast API. I
 
 ---
 
-## Section outline:
+## Section outline
 
 gRPC Course Overview: Get an understand of the course objectives, how the course is structured, download the course code and get ready!
 
-[Theory] gRPC Internals Deep Dive: Learn how gRPC works behind the scenes. Learn about HTTP/2, Protocol Buffers efficiencies, and the differences of gRPC and REST.
-
-[Hands-On] gRPC Project Overview & Setup: Setup your project using Gradle and learn how to trigger code generation
-
-[Hands-On] gRPC Unary: API description & implementation
-
-[Hands-On] gRPC Server Streaming: API description & implementation
-
-[Hands-On] gRPC Client Streaming: API description & implementation
-
-[Hands-On] gRPC Bi-Directional Streaming: API description & implementation
-
-[Hands-On] gRPC Advanced Features Deep Dive: Advanced features such as Error Handling, Deadlines, SSL Security.
-
-Next Steps: Some useful real-world links & where to take your learning from here
+* Theory: gRPC Internals Deep Dive: Learn how gRPC works behind the scenes. Learn about HTTP/2, Protocol Buffers efficiencies, and the differences of gRPC and REST.
+* Hands-On: gRPC Project Overview & Setup: Setup your project using Gradle and learn how to trigger code generation
+* Hands-On: gRPC Unary: API description & implementation
+* Hands-On: gRPC Server Streaming: API description & implementation
+* Hands-On: gRPC Client Streaming: API description & implementation
+* Hands-On: gRPC Bi-Directional Streaming: API description & implementation
+* Hands-On: gRPC Advanced Features Deep Dive: Advanced features such as Error Handling, Deadlines, SSL Security.
+* Next Steps: Some useful real-world links & where to take your learning from here
 
 ---
+
+## Table of Contents
+
+* [01. gPRC overview](01-gRPC-overview/README.md)
+* [02. Code Download](./02-code-download/README.md)
