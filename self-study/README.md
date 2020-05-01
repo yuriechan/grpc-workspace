@@ -10,6 +10,6 @@ I put them here as personal notes.
 ## Table of Contents
 
 * [protobuf3](./complete-guide-protobuf/README.md)
-* [grpc with go](./grpc-masterclass/README.md))
+* [grpc with go](./grpc-masterclass/README.md)
 
 ---
