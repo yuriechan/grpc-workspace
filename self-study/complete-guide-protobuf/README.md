@@ -64,7 +64,7 @@ Google Protobuf with examples and exercises. Code in Java Go Python. Say Goodbye
 
 * [Section 7. Golang Programming with Protocol Buffers](07-golang-programming-with-protocol-buffers/README.md)
 
-* [Section 8. Python Programming with Protocol Buffers](08-python-programming-with-protobol-buffers/README.md)
+* [Section 8. Python Programming with Protocol Buffers](08-python-programming-with-protocol-buffers/README.md)
 
 * [Section 9. Data Evolution with Protobuf](09-data-evolution-with-protobuf/README.md)
 
