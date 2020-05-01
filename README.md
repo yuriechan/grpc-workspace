@@ -4,8 +4,8 @@ This is a personal note for studying gRPC (Golang) + modern API & Microservices
 
 ## Table of Contents
 
-* Protocol Buffer: [link](/protocol-buffers-3-java-golang-python/TOC.md)
-* gRPC - modern API & Microservices: [link](/grpc-modern-api-microservices/TOC.md)
+* Protocol Buffer: [link](./self-study/complete-guide-protobuf/README.md)
+* gRPC - modern API & Microservices: [link](./self-study/grpc-masterclass/README.md)
 
 ## Short Introduction
 
