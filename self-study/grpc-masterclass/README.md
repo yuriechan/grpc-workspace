@@ -33,5 +33,16 @@ gRPC Course Overview: Get an understand of the course objectives, how the course
 
 ## Table of Contents
 
-* [01. gPRC overview](01-gRPC-overview/README.md)
+* [01. gPRC overview](./01-gRPC-overview/README.md)
 * [02. Code Download](./02-code-download/README.md)
+* [03. gRPC Internals](./03-grpc-internals/README.md)
+* [04. gRPC Project Overview Setup](./04-grpc-project-overview-setup/README.md)
+* [05. gRPC Unary](./05-grpc-unary/README.md)
+* [06. gRPC Server Streaming](./06-grpc-server-streaming/README.md)
+* [07. gRPC Client Streaming](./07-grpc-client-streaming/README.md)
+* [08. gRPC Bi-Directional Streaming](./08-grpc-bi-directional-streaming/README.md)
+* [09. gRPC Advanced Features](./09-grpc-advanced-features/README.md)
+* [10. CRUD API with MongoDB](./10-crud-api-with-mongodb/README.md)
+* [11. Next Steps](./11-next-steps/README.md)
+
+---
