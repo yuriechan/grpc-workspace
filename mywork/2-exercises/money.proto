@@ -2,6 +2,6 @@ syntax = "proto3";
 
 message Money {
     string currencyCode = 1;
-    int32 integralAmount = 2;
-    int32 decimalAmount = 3;
+    int64 units = 2;
+    int32 nanos = 3;
 }
